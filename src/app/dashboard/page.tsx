@@ -206,32 +206,17 @@ export default async function DashboardPage({
             </div>
           </div>
 
-          {/* Right Laptop Image + Save 80% Callout */}
-          <div className="lg:col-span-6 hidden sm:flex items-center justify-end gap-3">
-            <div className="relative -my-4">
+          {/* Right Branded Hero Banner Image */}
+          <div className="lg:col-span-6 hidden sm:flex items-center justify-end">
+            <div className="relative w-full max-w-[520px] overflow-hidden rounded-2xl border border-white/25 bg-white shadow-2xl">
               <Image
-                src="/hero-laptop.png"
-                alt="Quoventra Professional Estimate"
-                width={460}
-                height={310}
-                className="w-72 md:w-80 lg:w-[22rem] h-auto object-contain drop-shadow-[0_18px_28px_rgba(7,20,71,0.45)] select-none"
+                src="/hero-banner.jpg"
+                alt="Quoventra — Estimate Smarter. Grow Faster."
+                width={1040}
+                height={380}
+                className="w-full h-auto object-cover select-none"
                 priority
               />
-            </div>
-
-            {/* Save 80% Callout Bubble */}
-            <div className="relative self-center hidden xl:flex items-center gap-2.5 rounded-2xl bg-white px-4 py-3 text-slate-900 shadow-xl shrink-0">
-              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-sky-50 text-[#1d63ff]">
-                <Zap className="h-4 w-4 fill-[#1d63ff]" aria-hidden="true" />
-              </span>
-              <div className="leading-tight">
-                <p className="text-sm font-extrabold text-slate-900">
-                  Save 80%
-                </p>
-                <p className="text-[11px] font-medium text-slate-500">
-                  of your time
-                </p>
-              </div>
             </div>
           </div>
         </div>
