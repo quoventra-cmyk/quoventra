@@ -206,17 +206,27 @@ export default async function DashboardPage({
             </div>
           </div>
 
-          {/* Right Branded Hero Banner Image */}
+          {/* Right Branded Hero Banner Image (Animated) */}
           <div className="lg:col-span-6 hidden sm:flex items-center justify-end">
-            <div className="relative w-full max-w-[520px] overflow-hidden rounded-2xl border border-white/25 bg-white shadow-2xl">
-              <Image
-                src="/hero-banner.jpg"
-                alt="Quoventra — Estimate Smarter. Grow Faster."
-                width={1040}
-                height={380}
-                className="w-full h-auto object-cover select-none"
-                priority
+            <div className="animate-hero-float relative w-full max-w-[520px] group">
+              <div
+                className="pointer-events-none absolute -inset-1.5 rounded-3xl bg-gradient-to-r from-cyan-400/35 via-blue-400/30 to-violet-400/35 blur-lg opacity-80 transition-opacity duration-300 group-hover:opacity-100"
+                aria-hidden="true"
               />
+              <div className="relative overflow-hidden rounded-2xl border border-white/30 bg-white shadow-2xl transition-transform duration-300 group-hover:scale-[1.02]">
+                <Image
+                  src="/hero-banner.jpg"
+                  alt="Quoventra — Estimate Smarter. Grow Faster."
+                  width={1040}
+                  height={380}
+                  className="w-full h-auto object-cover select-none"
+                  priority
+                />
+                <div
+                  className="animate-hero-sheen pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+                  aria-hidden="true"
+                />
+              </div>
             </div>
           </div>
         </div>
