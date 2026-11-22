@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { getActiveBusinessContext, requireAuthUser } from "@/lib/auth/session";
 import { createInsForgeServerClient } from "@/lib/database/server";
+import { getBusinessEntitlements } from "@/services/subscriptions/entitlements";
 import { sendEmailViaResend } from "@/lib/email/resend";
 import {
   DEFAULT_EMAIL_TEMPLATES,
@@ -50,6 +51,23 @@ export async function updateNotificationSettingsAction(
       ok: false,
       error: parsed.error.issues[0]?.message ?? "Invalid settings.",
     };
+  }
+
+  const wantsAutomation =
+    parsed.data.autoQuotationReminders ||
+    parsed.data.autoInvoiceDueReminders ||
+    parsed.data.autoExpiryNotifications ||
+    parsed.data.autoFollowUpReminders;
+
+  if (wantsAutomation) {
+    const entitlements = await getBusinessEntitlements(context.business.id);
+    if (!entitlements.allowAutomation) {
+      return {
+        ok: false,
+        error:
+          "Automated reminders require the Business plan. Upgrade in Subscription to enable automation.",
+      };
+    }
   }
 
   const insforge = await createInsForgeServerClient();

@@ -127,6 +127,11 @@ export default async function QuotationDetailPage({
           discountValue: String(quotation.discount_value ?? 0),
           notes: quotation.notes ?? "",
           terms: quotation.terms ?? "",
+          brandColor:
+            (quotation.business_snapshot as { brand_color?: string } | null)
+              ?.brand_color ??
+            context.settings?.brand_color ??
+            "#2563eb",
           issueDate: quotation.issue_date,
           expiryDate: quotation.expiry_date ?? "",
           items:

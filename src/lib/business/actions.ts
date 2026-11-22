@@ -8,6 +8,7 @@ import {
   requireAuthUser,
 } from "@/lib/auth/session";
 import { createInsForgeServerClient } from "@/lib/database/server";
+import { getBusinessEntitlements } from "@/services/subscriptions/entitlements";
 
 const businessOnboardingSchema = z.object({
   businessName: z.string().trim().min(2, "Business name is required."),
@@ -156,6 +157,17 @@ export async function updateBusinessProfileAction(input: {
   }
 
   const insforge = await createInsForgeServerClient();
+
+  if (parsedBiz.data.logoUrl || parsedBiz.data.logoKey) {
+    const entitlements = await getBusinessEntitlements(context.business.id);
+    if (!entitlements.allowCustomBranding) {
+      return {
+        ok: false,
+        error:
+          "Custom business logo branding requires the Professional or Business plan.",
+      };
+    }
+  }
 
   const { error: bizErr } = await insforge.database
     .from("businesses")

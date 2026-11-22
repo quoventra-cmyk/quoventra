@@ -14,6 +14,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { DocumentColorPicker } from "@/components/ui/document-color-picker";
 import {
   Card,
   CardContent,
@@ -81,6 +82,7 @@ interface InvoiceEditorProps {
     paymentInstructions: string;
     notes: string;
     terms: string;
+    brandColor?: string;
     issueDate: string;
     dueDate: string;
     items: EditableInvoiceItem[];
@@ -124,6 +126,9 @@ export function InvoiceEditor({
   );
   const [notes, setNotes] = useState(initialValues.notes);
   const [terms, setTerms] = useState(initialValues.terms);
+  const [brandColor, setBrandColor] = useState(
+    initialValues.brandColor ?? "#2563eb"
+  );
   const [issueDate, setIssueDate] = useState(initialValues.issueDate);
   const [dueDate, setDueDate] = useState(initialValues.dueDate);
   const [items, setItems] = useState<EditableInvoiceItem[]>(
@@ -220,6 +225,7 @@ export function InvoiceEditor({
         paymentInstructions: paymentInstructions || undefined,
         notes: notes || undefined,
         terms: terms || undefined,
+        brandColor,
         issueDate,
         dueDate: dueDate || null,
         items: items.map((i) => ({
@@ -288,6 +294,42 @@ export function InvoiceEditor({
 
   return (
     <div className="space-y-6">
+      {/* Branded Document Theme & Live Preview Strip */}
+      <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-xs">
+        <div className="h-2 w-full" style={{ backgroundColor: brandColor }} />
+        <div className="p-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2.5">
+              <span
+                className="rounded-md px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider text-white"
+                style={{ backgroundColor: brandColor }}
+              >
+                Invoice
+              </span>
+              {invoiceNumber ? (
+                <span className="font-mono text-sm font-bold text-foreground">
+                  {invoiceNumber}
+                </span>
+              ) : null}
+            </div>
+            <p className="text-base font-bold text-foreground">
+              {title || "Untitled Invoice"}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Total:{" "}
+              <span className="font-bold" style={{ color: brandColor }}>
+                {formatCurrency(summary.total, currency)}
+              </span>{" "}
+              • Applies to your exported PDF invoice
+            </p>
+          </div>
+          <DocumentColorPicker
+            value={brandColor}
+            onChange={setBrandColor}
+            label="Invoice Color Theme"
+          />
+        </div>
+      </div>
       <form onSubmit={handleSubmit} className="space-y-6">
         {mode === "edit" && invoiceId ? (
           <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-card p-4">

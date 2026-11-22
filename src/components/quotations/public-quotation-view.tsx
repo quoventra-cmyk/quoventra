@@ -43,6 +43,7 @@ export interface PublicQuotationPayload {
     region?: string | null;
     country?: string | null;
     logo_url?: string | null;
+    brand_color?: string | null;
   };
   items: Array<{
     id: string;
@@ -80,6 +81,11 @@ export function PublicQuotationView({
 
   const isLocked =
     quotation.status === "converted" || quotation.status === "expired";
+  const accent =
+    quotation.business?.brand_color &&
+    /^#[0-9a-fA-F]{6}$/.test(quotation.business.brand_color)
+      ? quotation.business.brand_color
+      : "#2563eb";
 
   async function handleDecision(
     decision: "approved" | "rejected" | "changes_requested"
@@ -117,21 +123,31 @@ export function PublicQuotationView({
   return (
     <main className="min-h-screen bg-muted/20 py-10 px-4 sm:px-6">
       <div className="mx-auto max-w-4xl space-y-6">
-        <Card className="shadow-md">
-          <CardHeader className="border-b border-border bg-muted/30">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-              <div className="space-y-1">
-                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  Quotation from {quotation.business.name ?? "Business"}
+        <Card className="overflow-hidden rounded-2xl shadow-lg border-border/80">
+          <div className="h-2.5 w-full" style={{ backgroundColor: accent }} />
+          <CardHeader className="border-b border-border bg-card p-6 sm:p-8">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+              <div className="space-y-1.5">
+                <span
+                  className="inline-flex items-center rounded-md px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-white"
+                  style={{ backgroundColor: accent }}
+                >
+                  Quotation
+                </span>
+                <p className="text-sm font-semibold text-muted-foreground pt-1">
+                  From {quotation.business.name ?? "Business"}
                 </p>
-                <CardTitle className="text-2xl">
-                  {quotation.quotation_number} — {quotation.title}
+                <CardTitle className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+                  {quotation.title}
                 </CardTitle>
-                <CardDescription>
-                  Issue Date: {quotation.issue_date}
-                  {quotation.expiry_date
-                    ? ` • Valid Until: ${quotation.expiry_date}`
-                    : ""}
+                <CardDescription className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+                  <span className="font-mono font-bold text-foreground">
+                    {quotation.quotation_number}
+                  </span>
+                  <span>• Issue Date: {quotation.issue_date}</span>
+                  {quotation.expiry_date ? (
+                    <span>• Valid Until: {quotation.expiry_date}</span>
+                  ) : null}
                 </CardDescription>
               </div>
               <Badge
@@ -142,53 +158,64 @@ export function PublicQuotationView({
                       ? "destructive"
                       : "outline"
                 }
-                className="capitalize w-fit"
+                className="capitalize w-fit rounded-full px-3 py-1 text-xs font-bold"
               >
                 {quotation.status.replace("_", " ")}
               </Badge>
             </div>
           </CardHeader>
 
-          <CardContent className="p-6 space-y-6">
+          <CardContent className="p-6 sm:p-8 space-y-6">
             {quotation.description ? (
-              <p className="text-sm text-muted-foreground leading-relaxed">
+              <div
+                className="rounded-xl bg-muted/40 p-4 border-l-4 text-sm text-muted-foreground leading-relaxed"
+                style={{ borderLeftColor: accent }}
+              >
                 {quotation.description}
-              </p>
+              </div>
             ) : null}
 
-            <div className="overflow-x-auto rounded-lg border border-border">
+            <div className="overflow-x-auto rounded-xl border border-border">
               <table className="w-full text-left text-sm">
-                <thead className="bg-muted/50 text-xs text-muted-foreground">
+                <thead
+                  className="text-xs text-white uppercase tracking-wider"
+                  style={{ backgroundColor: accent }}
+                >
                   <tr>
-                    <th className="px-4 py-2.5 font-medium">Item</th>
-                    <th className="px-4 py-2.5 font-medium">Qty</th>
-                    <th className="px-4 py-2.5 font-medium">Unit Price</th>
-                    <th className="px-4 py-2.5 font-medium text-right">
+                    <th className="px-4 py-3 font-semibold">Item</th>
+                    <th className="px-4 py-3 font-semibold">Qty</th>
+                    <th className="px-4 py-3 font-semibold">Unit Price</th>
+                    <th className="px-4 py-3 font-semibold text-right">
                       Amount
                     </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
-                  {quotation.items.map((item) => (
-                    <tr key={item.id}>
-                      <td className="px-4 py-3">
-                        <p className="font-medium">{item.name}</p>
+                  {quotation.items.map((item, idx) => (
+                    <tr
+                      key={item.id}
+                      className={idx % 2 === 1 ? "bg-muted/25" : "bg-card"}
+                    >
+                      <td className="px-4 py-3.5">
+                        <p className="font-semibold text-foreground">
+                          {item.name}
+                        </p>
                         {item.description ? (
-                          <p className="text-xs text-muted-foreground">
+                          <p className="text-xs text-muted-foreground mt-0.5">
                             {item.description}
                           </p>
                         ) : null}
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-3.5">
                         {Number(item.quantity)} {item.unit}
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-3.5">
                         {formatCurrency(
                           Number(item.unit_price),
                           quotation.currency
                         )}
                       </td>
-                      <td className="px-4 py-3 text-right font-medium">
+                      <td className="px-4 py-3.5 text-right font-semibold">
                         {formatCurrency(
                           Number(item.line_total),
                           quotation.currency
@@ -200,42 +227,50 @@ export function PublicQuotationView({
               </table>
             </div>
 
-            <div className="flex flex-col items-end space-y-1.5 text-sm">
-              {Number(quotation.discount_amount) > 0 ? (
-                <div className="flex w-full max-w-xs justify-between">
-                  <span className="text-muted-foreground">Discount</span>
+            <div className="flex flex-col items-end">
+              <div className="w-full max-w-xs rounded-xl border border-border bg-muted/30 p-4 space-y-2 text-sm">
+                {Number(quotation.discount_amount) > 0 ? (
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Discount</span>
+                    <span>
+                      -
+                      {formatCurrency(
+                        Number(quotation.discount_amount),
+                        quotation.currency
+                      )}
+                    </span>
+                  </div>
+                ) : null}
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Subtotal</span>
                   <span>
-                    -
                     {formatCurrency(
-                      Number(quotation.discount_amount),
+                      Number(quotation.subtotal),
                       quotation.currency
                     )}
                   </span>
                 </div>
-              ) : null}
-              <div className="flex w-full max-w-xs justify-between">
-                <span className="text-muted-foreground">Subtotal</span>
-                <span>
-                  {formatCurrency(Number(quotation.subtotal), quotation.currency)}
-                </span>
-              </div>
-              <div className="flex w-full max-w-xs justify-between">
-                <span className="text-muted-foreground">
-                  Tax ({(Number(quotation.tax_rate) * 100).toFixed(2)}%)
-                </span>
-                <span>
-                  {formatCurrency(
-                    Number(quotation.tax_amount),
-                    quotation.currency
-                  )}
-                </span>
-              </div>
-              <Separator className="max-w-xs my-1" />
-              <div className="flex w-full max-w-xs justify-between text-base font-bold">
-                <span>Total</span>
-                <span>
-                  {formatCurrency(Number(quotation.total), quotation.currency)}
-                </span>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">
+                    Tax ({(Number(quotation.tax_rate) * 100).toFixed(2)}%)
+                  </span>
+                  <span>
+                    {formatCurrency(
+                      Number(quotation.tax_amount),
+                      quotation.currency
+                    )}
+                  </span>
+                </div>
+                <Separator className="my-1" />
+                <div className="flex justify-between text-base font-extrabold pt-1">
+                  <span>Total</span>
+                  <span style={{ color: accent }}>
+                    {formatCurrency(
+                      Number(quotation.total),
+                      quotation.currency
+                    )}
+                  </span>
+                </div>
               </div>
             </div>
 

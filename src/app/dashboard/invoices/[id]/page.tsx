@@ -130,6 +130,11 @@ export default async function InvoiceDetailPage({
           paymentInstructions: invoice.payment_instructions ?? "",
           notes: invoice.notes ?? "",
           terms: invoice.terms ?? "",
+          brandColor:
+            (invoice.business_snapshot as { brand_color?: string } | null)
+              ?.brand_color ??
+            context.settings?.brand_color ??
+            "#2563eb",
           issueDate: invoice.issue_date,
           dueDate: invoice.due_date ?? "",
           items:

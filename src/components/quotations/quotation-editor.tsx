@@ -18,6 +18,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { DocumentColorPicker } from "@/components/ui/document-color-picker";
 import {
   Card,
   CardContent,
@@ -86,6 +87,7 @@ interface QuotationEditorProps {
     discountValue: string;
     notes: string;
     terms: string;
+    brandColor?: string;
     issueDate: string;
     expiryDate: string;
     items: EditableQuotationItem[];
@@ -126,6 +128,9 @@ export function QuotationEditor({
   );
   const [notes, setNotes] = useState(initialValues.notes);
   const [terms, setTerms] = useState(initialValues.terms);
+  const [brandColor, setBrandColor] = useState(
+    initialValues.brandColor ?? "#2563eb"
+  );
   const [issueDate, setIssueDate] = useState(initialValues.issueDate);
   const [expiryDate, setExpiryDate] = useState(initialValues.expiryDate);
   const [items, setItems] = useState<EditableQuotationItem[]>(
@@ -217,6 +222,7 @@ export function QuotationEditor({
         discountValue: Number(discountValue) || 0,
         notes: notes || undefined,
         terms: terms || undefined,
+        brandColor,
         issueDate,
         expiryDate: expiryDate || null,
         items: items.map((i) => ({
@@ -257,6 +263,43 @@ export function QuotationEditor({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Branded Document Theme & Live Preview Strip */}
+      <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-xs">
+        <div className="h-2 w-full" style={{ backgroundColor: brandColor }} />
+        <div className="p-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2.5">
+              <span
+                className="rounded-md px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider text-white"
+                style={{ backgroundColor: brandColor }}
+              >
+                Quotation
+              </span>
+              {quotationNumber ? (
+                <span className="font-mono text-sm font-bold text-foreground">
+                  {quotationNumber}
+                </span>
+              ) : null}
+            </div>
+            <p className="text-base font-bold text-foreground">
+              {title || "Untitled Quotation"}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Total:{" "}
+              <span className="font-bold" style={{ color: brandColor }}>
+                {formatCurrency(summary.total, currency)}
+              </span>{" "}
+              • Applies to your PDF &amp; public approval page
+            </p>
+          </div>
+          <DocumentColorPicker
+            value={brandColor}
+            onChange={setBrandColor}
+            label="Quotation Color Theme"
+          />
+        </div>
+      </div>
+
       {mode === "edit" && quotationId ? (
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-card p-4">
           <div>

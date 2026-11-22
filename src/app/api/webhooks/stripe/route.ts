@@ -3,6 +3,50 @@ import type Stripe from "stripe";
 import { getServerEnv } from "@/config/env";
 import { getInsForgeAdminClient, getStripeClient } from "@/lib/payments/stripe";
 
+async function upsertBusinessSubscription(
+  admin: NonNullable<ReturnType<typeof getInsForgeAdminClient>>,
+  input: {
+    businessId: string;
+    planId: string;
+    tier: string;
+    status: string;
+    stripeSubscriptionId: string | null;
+    periodStart?: string | null;
+    periodEnd?: string | null;
+    cancelAtPeriodEnd?: boolean;
+  }
+) {
+  const { data: existing } = await admin.database
+    .from("subscriptions")
+    .select("id")
+    .eq("business_id", input.businessId)
+    .maybeSingle();
+
+  const payload = {
+    plan_id: input.planId,
+    tier: input.tier,
+    status: input.status,
+    stripe_subscription_id: input.stripeSubscriptionId,
+    current_period_start: input.periodStart ?? null,
+    current_period_end: input.periodEnd ?? null,
+    cancel_at_period_end: Boolean(input.cancelAtPeriodEnd),
+  };
+
+  if (existing?.id) {
+    await admin.database
+      .from("subscriptions")
+      .update(payload)
+      .eq("business_id", input.businessId);
+  } else {
+    await admin.database.from("subscriptions").insert([
+      {
+        business_id: input.businessId,
+        ...payload,
+      },
+    ]);
+  }
+}
+
 export async function POST(request: NextRequest) {
   const stripe = getStripeClient();
   const env = getServerEnv();
@@ -56,7 +100,26 @@ export async function POST(request: NextRequest) {
     },
   ]);
 
-  if (
+  if (event.type === "checkout.session.completed") {
+    const session = event.data.object as Stripe.Checkout.Session;
+    const businessId = session.metadata?.business_id;
+    const tier = session.metadata?.tier;
+    const planId = session.metadata?.plan_id;
+    const stripeSubId =
+      typeof session.subscription === "string"
+        ? session.subscription
+        : session.subscription?.id ?? null;
+
+    if (businessId && tier && planId) {
+      await upsertBusinessSubscription(admin, {
+        businessId,
+        planId,
+        tier,
+        status: "active",
+        stripeSubscriptionId: stripeSubId,
+      });
+    }
+  } else if (
     event.type === "customer.subscription.created" ||
     event.type === "customer.subscription.updated" ||
     event.type === "customer.subscription.deleted"
@@ -88,18 +151,16 @@ export async function POST(request: NextRequest) {
         ? new Date(firstItem.current_period_end * 1000).toISOString()
         : null;
 
-      await admin.database
-        .from("subscriptions")
-        .update({
-          plan_id: planId,
-          tier,
-          status: mappedStatus,
-          stripe_subscription_id: sub.id,
-          current_period_start: periodStart,
-          current_period_end: periodEnd,
-          cancel_at_period_end: Boolean(sub.cancel_at_period_end),
-        })
-        .eq("business_id", businessId);
+      await upsertBusinessSubscription(admin, {
+        businessId,
+        planId,
+        tier,
+        status: mappedStatus,
+        stripeSubscriptionId: sub.id,
+        periodStart,
+        periodEnd,
+        cancelAtPeriodEnd: Boolean(sub.cancel_at_period_end),
+      });
     }
   } else if (event.type === "invoice.payment_failed") {
     const inv = event.data.object as Stripe.Invoice;
@@ -123,4 +184,3 @@ export async function POST(request: NextRequest) {
 
   return NextResponse.json({ received: true });
 }
-

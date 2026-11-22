@@ -67,6 +67,11 @@ const quotationPayloadSchema = z.object({
   discountValue: z.coerce.number().min(0).default(0),
   notes: z.string().trim().max(2000).optional(),
   terms: z.string().trim().max(2000).optional(),
+  brandColor: z
+    .string()
+    .trim()
+    .regex(/^#[0-9a-fA-F]{6}$/, "Invalid color hex code.")
+    .optional(),
   issueDate: z.string().trim().min(8),
   expiryDate: z.string().trim().optional().nullable(),
   items: z.array(quotationItemSchema).min(1, "Add at least one line item."),
@@ -290,7 +295,10 @@ export async function createManualQuotationAction(
         terms: data.terms || context.settings?.default_payment_terms || null,
         issue_date: data.issueDate,
         expiry_date: data.expiryDate || null,
-        business_snapshot: buildBusinessSnapshot(context),
+        business_snapshot: {
+          ...buildBusinessSnapshot(context),
+          ...(data.brandColor ? { brand_color: data.brandColor } : {}),
+        },
       },
     ])
     .select("id")
@@ -384,6 +392,15 @@ export async function updateQuotationAction(
 
   const existingSnapshot = existing.business_snapshot as Record<string, unknown> | null;
   const hasSnapshot = existingSnapshot && Object.keys(existingSnapshot).length > 0;
+  const nextSnapshot = hasSnapshot
+    ? {
+        ...existingSnapshot,
+        ...(data.brandColor ? { brand_color: data.brandColor } : {}),
+      }
+    : {
+        ...buildBusinessSnapshot(context),
+        ...(data.brandColor ? { brand_color: data.brandColor } : {}),
+      };
 
   const { error: updateErr } = await insforge.database
     .from("quotations")
@@ -406,9 +423,7 @@ export async function updateQuotationAction(
       terms: data.terms || null,
       issue_date: data.issueDate,
       expiry_date: data.expiryDate || null,
-      business_snapshot: hasSnapshot
-        ? existingSnapshot
-        : buildBusinessSnapshot(context),
+      business_snapshot: nextSnapshot,
     })
     .eq("id", quotationId)
     .eq("business_id", context.business.id);

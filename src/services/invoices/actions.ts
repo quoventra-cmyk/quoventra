@@ -66,6 +66,11 @@ const invoicePayloadSchema = z.object({
   paymentInstructions: z.string().trim().max(2000).optional(),
   notes: z.string().trim().max(2000).optional(),
   terms: z.string().trim().max(2000).optional(),
+  brandColor: z
+    .string()
+    .trim()
+    .regex(/^#[0-9a-fA-F]{6}$/, "Invalid color hex code.")
+    .optional(),
   issueDate: z.string().trim().min(8),
   dueDate: z.string().trim().optional().nullable(),
   items: z.array(invoiceItemSchema).min(1, "Add at least one line item."),
@@ -315,7 +320,10 @@ export async function createManualInvoiceAction(
         payment_instructions: data.paymentInstructions || null,
         notes: data.notes || null,
         terms: data.terms || context.settings?.default_payment_terms || null,
-        business_snapshot: buildBusinessSnapshot(context),
+        business_snapshot: {
+          ...buildBusinessSnapshot(context),
+          ...(data.brandColor ? { brand_color: data.brandColor } : {}),
+        },
       },
     ])
     .select("id")
@@ -413,6 +421,15 @@ export async function updateInvoiceAction(
 
   const existingSnapshot = existing.business_snapshot as Record<string, unknown> | null;
   const hasSnapshot = existingSnapshot && Object.keys(existingSnapshot).length > 0;
+  const nextSnapshot = hasSnapshot
+    ? {
+        ...existingSnapshot,
+        ...(data.brandColor ? { brand_color: data.brandColor } : {}),
+      }
+    : {
+        ...buildBusinessSnapshot(context),
+        ...(data.brandColor ? { brand_color: data.brandColor } : {}),
+      };
 
   const { error: updateErr } = await insforge.database
     .from("invoices")
@@ -437,9 +454,7 @@ export async function updateInvoiceAction(
       payment_instructions: data.paymentInstructions || null,
       notes: data.notes || null,
       terms: data.terms || null,
-      business_snapshot: hasSnapshot
-        ? existingSnapshot
-        : buildBusinessSnapshot(context),
+      business_snapshot: nextSnapshot,
     })
     .eq("id", invoiceId)
     .eq("business_id", context.business.id);
