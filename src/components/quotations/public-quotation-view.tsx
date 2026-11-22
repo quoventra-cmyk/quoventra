@@ -44,6 +44,11 @@ export interface PublicQuotationPayload {
     country?: string | null;
     logo_url?: string | null;
     brand_color?: string | null;
+    template_style?:
+      | "executive_sidebar"
+      | "classic_banner"
+      | "modern_corporate"
+      | null;
   };
   items: Array<{
     id: string;
@@ -86,6 +91,8 @@ export function PublicQuotationView({
     /^#[0-9a-fA-F]{6}$/.test(quotation.business.brand_color)
       ? quotation.business.brand_color
       : "#2563eb";
+  const templateStyle =
+    quotation.business?.template_style ?? "executive_sidebar";
 
   async function handleDecision(
     decision: "approved" | "rejected" | "changes_requested"
@@ -124,24 +131,74 @@ export function PublicQuotationView({
     <main className="min-h-screen bg-muted/20 py-10 px-4 sm:px-6">
       <div className="mx-auto max-w-4xl space-y-6">
         <Card className="overflow-hidden rounded-2xl shadow-lg border-border/80">
-          <div className="h-2.5 w-full" style={{ backgroundColor: accent }} />
-          <CardHeader className="border-b border-border bg-card p-6 sm:p-8">
+          {templateStyle !== "executive_sidebar" ? (
+            <div
+              className={
+                templateStyle === "classic_banner"
+                  ? "h-4 w-full"
+                  : "h-2.5 w-full"
+              }
+              style={{ backgroundColor: accent }}
+            />
+          ) : null}
+          <CardHeader
+            className={
+              templateStyle === "executive_sidebar"
+                ? "p-6 sm:p-8 text-white"
+                : templateStyle === "modern_corporate"
+                  ? "border-b border-border bg-muted/50 p-6 sm:p-8"
+                  : "border-b border-border bg-card p-6 sm:p-8"
+            }
+            style={
+              templateStyle === "executive_sidebar"
+                ? { backgroundColor: accent }
+                : undefined
+            }
+          >
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div className="space-y-1.5">
                 <span
-                  className="inline-flex items-center rounded-md px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-white"
-                  style={{ backgroundColor: accent }}
+                  className="inline-flex items-center rounded-md px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider"
+                  style={
+                    templateStyle === "executive_sidebar"
+                      ? { backgroundColor: "#ffffff", color: accent }
+                      : { backgroundColor: accent, color: "#ffffff" }
+                  }
                 >
                   Quotation
                 </span>
-                <p className="text-sm font-semibold text-muted-foreground pt-1">
+                <p
+                  className={
+                    templateStyle === "executive_sidebar"
+                      ? "text-sm font-semibold text-white/90 pt-1"
+                      : "text-sm font-semibold text-muted-foreground pt-1"
+                  }
+                >
                   From {quotation.business.name ?? "Business"}
                 </p>
-                <CardTitle className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+                <CardTitle
+                  className={
+                    templateStyle === "executive_sidebar"
+                      ? "text-2xl sm:text-3xl font-extrabold tracking-tight text-white"
+                      : "text-2xl sm:text-3xl font-extrabold tracking-tight"
+                  }
+                >
                   {quotation.title}
                 </CardTitle>
-                <CardDescription className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
-                  <span className="font-mono font-bold text-foreground">
+                <CardDescription
+                  className={
+                    templateStyle === "executive_sidebar"
+                      ? "flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-white/85"
+                      : "flex flex-wrap items-center gap-x-3 gap-y-1 text-xs"
+                  }
+                >
+                  <span
+                    className={
+                      templateStyle === "executive_sidebar"
+                        ? "font-mono font-bold text-white"
+                        : "font-mono font-bold text-foreground"
+                    }
+                  >
                     {quotation.quotation_number}
                   </span>
                   <span>• Issue Date: {quotation.issue_date}</span>
@@ -158,7 +215,7 @@ export function PublicQuotationView({
                       ? "destructive"
                       : "outline"
                 }
-                className="capitalize w-fit rounded-full px-3 py-1 text-xs font-bold"
+                className="capitalize w-fit rounded-full px-3 py-1 text-xs font-bold bg-white/95 text-slate-900"
               >
                 {quotation.status.replace("_", " ")}
               </Badge>

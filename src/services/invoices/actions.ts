@@ -71,6 +71,9 @@ const invoicePayloadSchema = z.object({
     .trim()
     .regex(/^#[0-9a-fA-F]{6}$/, "Invalid color hex code.")
     .optional(),
+  templateStyle: z
+    .enum(["executive_sidebar", "classic_banner", "modern_corporate"])
+    .optional(),
   issueDate: z.string().trim().min(8),
   dueDate: z.string().trim().optional().nullable(),
   items: z.array(invoiceItemSchema).min(1, "Add at least one line item."),
@@ -323,6 +326,7 @@ export async function createManualInvoiceAction(
         business_snapshot: {
           ...buildBusinessSnapshot(context),
           ...(data.brandColor ? { brand_color: data.brandColor } : {}),
+          ...(data.templateStyle ? { template_style: data.templateStyle } : {}),
         },
       },
     ])
@@ -425,10 +429,12 @@ export async function updateInvoiceAction(
     ? {
         ...existingSnapshot,
         ...(data.brandColor ? { brand_color: data.brandColor } : {}),
+        ...(data.templateStyle ? { template_style: data.templateStyle } : {}),
       }
     : {
         ...buildBusinessSnapshot(context),
         ...(data.brandColor ? { brand_color: data.brandColor } : {}),
+        ...(data.templateStyle ? { template_style: data.templateStyle } : {}),
       };
 
   const { error: updateErr } = await insforge.database

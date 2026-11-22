@@ -132,6 +132,15 @@ export default async function QuotationDetailPage({
               ?.brand_color ??
             context.settings?.brand_color ??
             "#2563eb",
+          templateStyle:
+            (
+              quotation.business_snapshot as {
+                template_style?:
+                  | "executive_sidebar"
+                  | "classic_banner"
+                  | "modern_corporate";
+              } | null
+            )?.template_style ?? "executive_sidebar",
           issueDate: quotation.issue_date,
           expiryDate: quotation.expiry_date ?? "",
           items:

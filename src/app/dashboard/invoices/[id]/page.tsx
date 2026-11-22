@@ -135,6 +135,15 @@ export default async function InvoiceDetailPage({
               ?.brand_color ??
             context.settings?.brand_color ??
             "#2563eb",
+          templateStyle:
+            (
+              invoice.business_snapshot as {
+                template_style?:
+                  | "executive_sidebar"
+                  | "classic_banner"
+                  | "modern_corporate";
+              } | null
+            )?.template_style ?? "executive_sidebar",
           issueDate: invoice.issue_date,
           dueDate: invoice.due_date ?? "",
           items:

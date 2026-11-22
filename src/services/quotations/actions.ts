@@ -72,6 +72,9 @@ const quotationPayloadSchema = z.object({
     .trim()
     .regex(/^#[0-9a-fA-F]{6}$/, "Invalid color hex code.")
     .optional(),
+  templateStyle: z
+    .enum(["executive_sidebar", "classic_banner", "modern_corporate"])
+    .optional(),
   issueDate: z.string().trim().min(8),
   expiryDate: z.string().trim().optional().nullable(),
   items: z.array(quotationItemSchema).min(1, "Add at least one line item."),
@@ -298,6 +301,7 @@ export async function createManualQuotationAction(
         business_snapshot: {
           ...buildBusinessSnapshot(context),
           ...(data.brandColor ? { brand_color: data.brandColor } : {}),
+          ...(data.templateStyle ? { template_style: data.templateStyle } : {}),
         },
       },
     ])
@@ -396,10 +400,12 @@ export async function updateQuotationAction(
     ? {
         ...existingSnapshot,
         ...(data.brandColor ? { brand_color: data.brandColor } : {}),
+        ...(data.templateStyle ? { template_style: data.templateStyle } : {}),
       }
     : {
         ...buildBusinessSnapshot(context),
         ...(data.brandColor ? { brand_color: data.brandColor } : {}),
+        ...(data.templateStyle ? { template_style: data.templateStyle } : {}),
       };
 
   const { error: updateErr } = await insforge.database

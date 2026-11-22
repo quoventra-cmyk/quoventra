@@ -14,7 +14,11 @@ import {
   Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { DocumentColorPicker } from "@/components/ui/document-color-picker";
+import {
+  DocumentColorPicker,
+  DocumentTemplatePicker,
+  type DocumentTemplateStyle,
+} from "@/components/ui/document-color-picker";
 import {
   Card,
   CardContent,
@@ -83,6 +87,7 @@ interface InvoiceEditorProps {
     notes: string;
     terms: string;
     brandColor?: string;
+    templateStyle?: DocumentTemplateStyle;
     issueDate: string;
     dueDate: string;
     items: EditableInvoiceItem[];
@@ -128,6 +133,9 @@ export function InvoiceEditor({
   const [terms, setTerms] = useState(initialValues.terms);
   const [brandColor, setBrandColor] = useState(
     initialValues.brandColor ?? "#2563eb"
+  );
+  const [templateStyle, setTemplateStyle] = useState<DocumentTemplateStyle>(
+    initialValues.templateStyle ?? "executive_sidebar"
   );
   const [issueDate, setIssueDate] = useState(initialValues.issueDate);
   const [dueDate, setDueDate] = useState(initialValues.dueDate);
@@ -226,6 +234,7 @@ export function InvoiceEditor({
         notes: notes || undefined,
         terms: terms || undefined,
         brandColor,
+        templateStyle,
         issueDate,
         dueDate: dueDate || null,
         items: items.map((i) => ({
@@ -327,6 +336,13 @@ export function InvoiceEditor({
             value={brandColor}
             onChange={setBrandColor}
             label="Invoice Color Theme"
+          />
+        </div>
+        <div className="border-t border-border/70 bg-muted/20 px-5 py-4">
+          <DocumentTemplatePicker
+            value={templateStyle}
+            onChange={setTemplateStyle}
+            accentColor={brandColor}
           />
         </div>
       </div>

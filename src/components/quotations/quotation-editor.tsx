@@ -18,7 +18,11 @@ import {
   Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { DocumentColorPicker } from "@/components/ui/document-color-picker";
+import {
+  DocumentColorPicker,
+  DocumentTemplatePicker,
+  type DocumentTemplateStyle,
+} from "@/components/ui/document-color-picker";
 import {
   Card,
   CardContent,
@@ -88,6 +92,7 @@ interface QuotationEditorProps {
     notes: string;
     terms: string;
     brandColor?: string;
+    templateStyle?: DocumentTemplateStyle;
     issueDate: string;
     expiryDate: string;
     items: EditableQuotationItem[];
@@ -130,6 +135,9 @@ export function QuotationEditor({
   const [terms, setTerms] = useState(initialValues.terms);
   const [brandColor, setBrandColor] = useState(
     initialValues.brandColor ?? "#2563eb"
+  );
+  const [templateStyle, setTemplateStyle] = useState<DocumentTemplateStyle>(
+    initialValues.templateStyle ?? "executive_sidebar"
   );
   const [issueDate, setIssueDate] = useState(initialValues.issueDate);
   const [expiryDate, setExpiryDate] = useState(initialValues.expiryDate);
@@ -223,6 +231,7 @@ export function QuotationEditor({
         notes: notes || undefined,
         terms: terms || undefined,
         brandColor,
+        templateStyle,
         issueDate,
         expiryDate: expiryDate || null,
         items: items.map((i) => ({
@@ -296,6 +305,13 @@ export function QuotationEditor({
             value={brandColor}
             onChange={setBrandColor}
             label="Quotation Color Theme"
+          />
+        </div>
+        <div className="border-t border-border/70 bg-muted/20 px-5 py-4">
+          <DocumentTemplatePicker
+            value={templateStyle}
+            onChange={setTemplateStyle}
+            accentColor={brandColor}
           />
         </div>
       </div>
