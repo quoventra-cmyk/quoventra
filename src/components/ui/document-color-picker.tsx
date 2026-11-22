@@ -1,6 +1,7 @@
 "use client";
 
-import { Check, LayoutTemplate, Palette } from "lucide-react";
+import { useRef, useState, type ChangeEvent } from "react";
+import { Check, ImagePlus, LayoutTemplate, Palette, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const DOCUMENT_COLOR_PRESETS = [
@@ -454,6 +455,105 @@ export function DocumentTemplatePicker({
           );
         })}
       </div>
+    </div>
+  );
+}
+
+interface DocumentLogoUploaderProps {
+  value: string;
+  onChange: (logoDataOrUrl: string) => void;
+  disabled?: boolean;
+}
+
+export function DocumentLogoUploader({
+  value,
+  onChange,
+  disabled = false,
+}: DocumentLogoUploaderProps) {
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const currentLogo = value?.trim() || "/quoventra-logo.png";
+  const isCustom = currentLogo !== "/quoventra-logo.png";
+
+  function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
+    setUploadError(null);
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      setUploadError("Please select a PNG or JPG image.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new window.Image();
+      img.onload = () => {
+        const maxW = 320;
+        const maxH = 160;
+        let w = img.width || 200;
+        let h = img.height || 100;
+        const ratio = Math.min(maxW / w, maxH / h, 1);
+        w = Math.max(1, Math.round(w * ratio));
+        h = Math.max(1, Math.round(h * ratio));
+
+        const canvas = document.createElement("canvas");
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          setUploadError("Could not process logo image.");
+          return;
+        }
+        ctx.clearRect(0, 0, w, h);
+        ctx.drawImage(img, 0, 0, w, h);
+        const pngDataUrl = canvas.toDataURL("image/png");
+        onChange(pngDataUrl);
+      };
+      img.onerror = () => {
+        setUploadError("Could not read image file.");
+      };
+      img.src = String(reader.result);
+    };
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  }
+
+  return (
+    <div className="flex flex-wrap items-center gap-2.5">
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/png,image/jpeg,image/webp"
+        onChange={handleFileChange}
+        disabled={disabled}
+        className="hidden"
+      />
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => inputRef.current?.click()}
+        className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-card px-3 py-1.5 text-xs font-semibold text-foreground shadow-2xs hover:bg-muted transition-colors disabled:opacity-50"
+      >
+        <ImagePlus className="h-3.5 w-3.5 text-blue-600" aria-hidden="true" />
+        <span>Upload Logo (PNG/JPG)</span>
+      </button>
+
+      {isCustom ? (
+        <button
+          type="button"
+          disabled={disabled}
+          onClick={() => onChange("/quoventra-logo.png")}
+          className="inline-flex items-center gap-1 rounded-xl border border-border bg-muted/40 px-2.5 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+        >
+          <RotateCcw className="h-3 w-3" aria-hidden="true" />
+          <span>Reset Logo</span>
+        </button>
+      ) : null}
+
+      {uploadError ? (
+        <span className="text-xs text-destructive">{uploadError}</span>
+      ) : null}
     </div>
   );
 }

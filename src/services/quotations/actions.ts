@@ -85,7 +85,7 @@ const quotationPayloadSchema = z.object({
       "royal_bordered",
     ])
     .optional(),
-  logoUrl: z.string().trim().max(500).optional(),
+  logoUrl: z.string().trim().max(500000).optional(),
   issueDate: z.string().trim().min(8),
   expiryDate: z.string().trim().optional().nullable(),
   items: z.array(quotationItemSchema).min(1, "Add at least one line item."),
@@ -146,7 +146,7 @@ export async function convertEstimateToQuotationAction(
 
   const snapshot =
     estimate.business_snapshot &&
-    Object.keys(estimate.business_snapshot as Record<string, unknown>).length > 0
+      Object.keys(estimate.business_snapshot as Record<string, unknown>).length > 0
       ? estimate.business_snapshot
       : buildBusinessSnapshot(context);
 
@@ -412,21 +412,21 @@ export async function updateQuotationAction(
   const hasSnapshot = existingSnapshot && Object.keys(existingSnapshot).length > 0;
   const nextSnapshot = hasSnapshot
     ? {
-        ...existingSnapshot,
-        ...(data.brandColor ? { brand_color: data.brandColor } : {}),
-        ...(data.templateStyle ? { template_style: data.templateStyle } : {}),
-        ...(data.logoUrl !== undefined
-          ? { logo_url: data.logoUrl || null }
-          : {}),
-      }
+      ...existingSnapshot,
+      ...(data.brandColor ? { brand_color: data.brandColor } : {}),
+      ...(data.templateStyle ? { template_style: data.templateStyle } : {}),
+      ...(data.logoUrl !== undefined
+        ? { logo_url: data.logoUrl || null }
+        : {}),
+    }
     : {
-        ...buildBusinessSnapshot(context),
-        ...(data.brandColor ? { brand_color: data.brandColor } : {}),
-        ...(data.templateStyle ? { template_style: data.templateStyle } : {}),
-        ...(data.logoUrl !== undefined
-          ? { logo_url: data.logoUrl || null }
-          : {}),
-      };
+      ...buildBusinessSnapshot(context),
+      ...(data.brandColor ? { brand_color: data.brandColor } : {}),
+      ...(data.templateStyle ? { template_style: data.templateStyle } : {}),
+      ...(data.logoUrl !== undefined
+        ? { logo_url: data.logoUrl || null }
+        : {}),
+    };
 
   const { error: updateErr } = await insforge.database
     .from("quotations")

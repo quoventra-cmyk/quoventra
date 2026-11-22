@@ -16,6 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import {
   DocumentColorPicker,
+  DocumentLogoUploader,
   DocumentTemplatePicker,
   type DocumentTemplateStyle,
 } from "@/components/ui/document-color-picker";
@@ -351,18 +352,7 @@ export function InvoiceEditor({
               onChange={setBrandColor}
               label="Invoice Color Theme"
             />
-            <div className="flex items-center gap-2">
-              <Label htmlFor="invoice-logo-url" className="text-xs shrink-0">
-                Logo URL:
-              </Label>
-              <Input
-                id="invoice-logo-url"
-                value={logoUrl}
-                onChange={(e) => setLogoUrl(e.target.value)}
-                placeholder="/quoventra-logo.png or https://..."
-                className="h-8 text-xs"
-              />
-            </div>
+            <DocumentLogoUploader value={logoUrl} onChange={setLogoUrl} />
           </div>
         </div>
         <div className="border-t border-border/70 bg-muted/20 px-5 py-4">

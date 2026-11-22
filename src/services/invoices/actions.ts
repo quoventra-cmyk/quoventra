@@ -84,7 +84,7 @@ const invoicePayloadSchema = z.object({
       "royal_bordered",
     ])
     .optional(),
-  logoUrl: z.string().trim().max(500).optional(),
+  logoUrl: z.string().trim().max(500000).optional(),
   issueDate: z.string().trim().min(8),
   dueDate: z.string().trim().optional().nullable(),
   items: z.array(invoiceItemSchema).min(1, "Add at least one line item."),
