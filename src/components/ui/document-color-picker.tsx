@@ -14,10 +14,20 @@ export const DOCUMENT_COLOR_PRESETS = [
   { name: "Rose Crimson", hex: "#e11d48" },
 ] as const;
 
+export const DOCUMENT_TEMPLATE_STYLE_IDS = [
+  "executive_sidebar",
+  "classic_banner",
+  "modern_corporate",
+  "minimal_swiss",
+  "bold_split_header",
+  "centered_prestige",
+  "sleek_agency",
+  "compact_contractor",
+  "royal_bordered",
+] as const;
+
 export type DocumentTemplateStyle =
-  | "executive_sidebar"
-  | "classic_banner"
-  | "modern_corporate";
+  (typeof DOCUMENT_TEMPLATE_STYLE_IDS)[number];
 
 export const DOCUMENT_TEMPLATE_STYLES: Array<{
   id: DocumentTemplateStyle;
@@ -26,18 +36,48 @@ export const DOCUMENT_TEMPLATE_STYLES: Array<{
 }> = [
   {
     id: "executive_sidebar",
-    name: "Executive Sidebar",
+    name: "1. Executive Sidebar",
     subtitle: "Bold header + left client sidebar",
   },
   {
     id: "classic_banner",
-    name: "Classic Banner",
+    name: "2. Classic Dual-Banner",
     subtitle: "Top/bottom bars + 3-column details",
   },
   {
     id: "modern_corporate",
-    name: "Modern Corporate",
+    name: "3. Modern Corporate",
     subtitle: "Shaded header band + bordered grid",
+  },
+  {
+    id: "minimal_swiss",
+    name: "4. Minimal Swiss",
+    subtitle: "Left accent spine + clean editorial grid",
+  },
+  {
+    id: "bold_split_header",
+    name: "5. Bold Split Header",
+    subtitle: "Two-tone split banner + floating cards",
+  },
+  {
+    id: "centered_prestige",
+    name: "6. Centered Prestige",
+    subtitle: "Centered logo crest + double rule frame",
+  },
+  {
+    id: "sleek_agency",
+    name: "7. Sleek Agency",
+    subtitle: "Dark slate header + vibrant accent pill",
+  },
+  {
+    id: "compact_contractor",
+    name: "8. Contractor Pro",
+    subtitle: "4-box job metadata + signature block",
+  },
+  {
+    id: "royal_bordered",
+    name: "9. Royal Framed",
+    subtitle: "Full outer accent frame + corner badge",
   },
 ];
 
@@ -60,7 +100,10 @@ export function DocumentColorPicker({
     <div className="space-y-2.5">
       <div className="flex items-center justify-between gap-2">
         <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-foreground">
-          <Palette className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />
+          <Palette
+            className="h-3.5 w-3.5 text-muted-foreground"
+            aria-hidden="true"
+          />
           {label}
         </span>
         <span className="inline-flex items-center gap-1.5 rounded-full border border-border px-2.5 py-0.5 text-[11px] font-mono font-semibold text-foreground">
@@ -121,6 +164,222 @@ export function DocumentColorPicker({
   );
 }
 
+function TemplateMiniPreview({
+  id,
+  accent,
+}: {
+  id: DocumentTemplateStyle;
+  accent: string;
+}) {
+  if (id === "executive_sidebar") {
+    return (
+      <>
+        <div
+          className="h-3.5 w-full px-1 flex items-center justify-between"
+          style={{ backgroundColor: accent }}
+        >
+          <span className="h-2 w-2 rounded-2xs bg-white/95" />
+          <span className="h-1 w-3 rounded-2xs bg-white/80" />
+        </div>
+        <div className="flex-1 flex gap-1 p-1">
+          <div className="w-3 rounded-2xs bg-slate-100 h-full" />
+          <div className="flex-1 space-y-1 pt-0.5">
+            <div className="h-1 w-full bg-slate-200 rounded-2xs" />
+            <div className="h-1 w-full bg-slate-200 rounded-2xs" />
+            <div
+              className="h-1.5 w-4 ml-auto rounded-2xs mt-1"
+              style={{ backgroundColor: accent }}
+            />
+          </div>
+        </div>
+        <div className="h-1 w-full" style={{ backgroundColor: accent }} />
+      </>
+    );
+  }
+  if (id === "classic_banner") {
+    return (
+      <>
+        <div className="h-1.5 w-full" style={{ backgroundColor: accent }} />
+        <div className="flex-1 p-1 space-y-1">
+          <div className="flex justify-between items-center">
+            <span className="h-1.5 w-4 bg-slate-800 rounded-2xs" />
+            <span className="h-2 w-2 rounded-full bg-slate-300" />
+          </div>
+          <div className="grid grid-cols-3 gap-0.5">
+            <span className="h-1.5 bg-slate-100 rounded-2xs" />
+            <span className="h-1.5 bg-slate-100 rounded-2xs" />
+            <span className="h-1.5 bg-slate-100 rounded-2xs" />
+          </div>
+          <div
+            className="h-1.5 w-full rounded-2xs"
+            style={{ backgroundColor: accent }}
+          />
+          <div className="h-2 w-full bg-slate-100 rounded-2xs" />
+        </div>
+        <div className="h-1.5 w-full" style={{ backgroundColor: accent }} />
+      </>
+    );
+  }
+  if (id === "modern_corporate") {
+    return (
+      <>
+        <div className="h-1 w-full" style={{ backgroundColor: accent }} />
+        <div className="h-3.5 w-full bg-slate-100 px-1 flex items-center justify-between">
+          <span className="h-2 w-2 rounded-full bg-slate-400" />
+          <span className="h-1 w-3 bg-slate-500 rounded-2xs" />
+        </div>
+        <div className="flex-1 p-1 space-y-1">
+          <div
+            className="h-1.5 w-full rounded-2xs"
+            style={{ backgroundColor: accent }}
+          />
+          <div className="h-3 w-full border border-slate-200 rounded-2xs" />
+        </div>
+        <div className="h-1 w-full" style={{ backgroundColor: accent }} />
+      </>
+    );
+  }
+  if (id === "minimal_swiss") {
+    return (
+      <div className="flex h-full w-full">
+        <div className="w-1.5 h-full" style={{ backgroundColor: accent }} />
+        <div className="flex-1 p-1 space-y-1">
+          <div className="flex justify-between items-center">
+            <span
+              className="h-2 w-2 rounded-2xs"
+              style={{ backgroundColor: accent }}
+            />
+            <span className="h-1 w-3 bg-slate-400 rounded-2xs" />
+          </div>
+          <div className="h-0.5 w-full bg-slate-200" />
+          <div className="h-1 w-full bg-slate-100" />
+          <div className="h-1 w-full bg-slate-100" />
+          <div
+            className="h-1.5 w-4 ml-auto rounded-2xs"
+            style={{ backgroundColor: accent }}
+          />
+        </div>
+      </div>
+    );
+  }
+  if (id === "bold_split_header") {
+    return (
+      <>
+        <div className="h-4 w-full flex">
+          <div
+            className="w-3/5 h-full px-1 flex items-center"
+            style={{ backgroundColor: accent }}
+          >
+            <span className="h-2 w-2 rounded-2xs bg-white" />
+          </div>
+          <div className="w-2/5 h-full bg-slate-900 flex items-center justify-end px-1">
+            <span className="h-1 w-2.5 bg-white/80 rounded-2xs" />
+          </div>
+        </div>
+        <div className="flex-1 p-1 space-y-1">
+          <div className="grid grid-cols-2 gap-1">
+            <span className="h-2 bg-slate-100 rounded-2xs" />
+            <span className="h-2 bg-slate-100 rounded-2xs" />
+          </div>
+          <div
+            className="h-1.5 w-full rounded-full"
+            style={{ backgroundColor: accent }}
+          />
+          <div className="h-2 w-full bg-slate-100 rounded-2xs" />
+        </div>
+      </>
+    );
+  }
+  if (id === "centered_prestige") {
+    return (
+      <div className="flex-1 p-1 flex flex-col items-center space-y-1">
+        <span
+          className="h-2.5 w-2.5 rounded-full"
+          style={{ backgroundColor: accent }}
+        />
+        <div className="h-0.5 w-full" style={{ backgroundColor: accent }} />
+        <div className="w-full flex-1 space-y-1 pt-0.5">
+          <div className="h-1.5 w-full bg-slate-100 rounded-2xs" />
+          <div className="h-1.5 w-full bg-slate-100 rounded-2xs" />
+        </div>
+        <div className="h-0.5 w-full" style={{ backgroundColor: accent }} />
+      </div>
+    );
+  }
+  if (id === "sleek_agency") {
+    return (
+      <>
+        <div className="h-4 w-full bg-slate-900 px-1 flex items-center justify-between">
+          <span className="h-2 w-2 rounded-full bg-white" />
+          <span
+            className="h-1.5 w-3 rounded-full"
+            style={{ backgroundColor: accent }}
+          />
+        </div>
+        <div className="h-0.5 w-full" style={{ backgroundColor: accent }} />
+        <div className="flex-1 p-1 space-y-1">
+          <div className="h-1.5 w-full bg-slate-100 rounded-2xs" />
+          <div className="h-1.5 w-full bg-slate-100 rounded-2xs" />
+          <div
+            className="h-2 w-5 ml-auto rounded-2xs"
+            style={{ backgroundColor: accent }}
+          />
+        </div>
+      </>
+    );
+  }
+  if (id === "compact_contractor") {
+    return (
+      <div className="flex-1 p-1 space-y-1">
+        <div className="flex justify-between items-center border-b border-slate-300 pb-0.5">
+          <span
+            className="h-2 w-2 rounded-2xs"
+            style={{ backgroundColor: accent }}
+          />
+          <span className="h-1.5 w-4 bg-slate-700 rounded-2xs" />
+        </div>
+        <div className="grid grid-cols-4 gap-0.5">
+          <span className="h-1.5 border border-slate-300" />
+          <span className="h-1.5 border border-slate-300" />
+          <span className="h-1.5 border border-slate-300" />
+          <span className="h-1.5 border border-slate-300" />
+        </div>
+        <div
+          className="h-1.5 w-full"
+          style={{ backgroundColor: accent }}
+        />
+        <div className="h-2.5 w-full border border-slate-300" />
+      </div>
+    );
+  }
+  // royal_bordered
+  return (
+    <div
+      className="m-0.5 flex-1 rounded-2xs border-2 p-1 flex flex-col justify-between"
+      style={{ borderColor: accent }}
+    >
+      <div className="flex justify-between items-center">
+        <span
+          className="h-2 w-2 rounded-2xs"
+          style={{ backgroundColor: accent }}
+        />
+        <span
+          className="h-1.5 w-3.5 rounded-2xs"
+          style={{ backgroundColor: accent }}
+        />
+      </div>
+      <div className="space-y-0.5">
+        <div className="h-1 w-full bg-slate-200" />
+        <div className="h-1 w-full bg-slate-100" />
+      </div>
+      <div
+        className="h-1.5 w-4 ml-auto rounded-2xs"
+        style={{ backgroundColor: accent }}
+      />
+    </div>
+  );
+}
+
 interface DocumentTemplatePickerProps {
   value: DocumentTemplateStyle;
   onChange: (style: DocumentTemplateStyle) => void;
@@ -140,15 +399,20 @@ export function DocumentTemplatePicker({
 
   return (
     <div className="space-y-2.5">
-      <div className="flex items-center gap-1.5 text-xs font-semibold text-foreground">
-        <LayoutTemplate
-          className="h-3.5 w-3.5 text-muted-foreground"
-          aria-hidden="true"
-        />
-        <span>Choose Document Layout Sample</span>
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-1.5 text-xs font-semibold text-foreground">
+          <LayoutTemplate
+            className="h-3.5 w-3.5 text-muted-foreground"
+            aria-hidden="true"
+          />
+          <span>Choose Document Layout Sample (9 Designs)</span>
+        </div>
+        <span className="text-[11px] text-muted-foreground">
+          Includes company logo on every layout
+        </span>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
         {DOCUMENT_TEMPLATE_STYLES.map((tpl) => {
           const active = value === tpl.id;
           return (
@@ -158,89 +422,14 @@ export function DocumentTemplatePicker({
               disabled={disabled}
               onClick={() => onChange(tpl.id)}
               className={cn(
-                "group relative flex items-center gap-3 rounded-xl border p-3 text-left transition-all",
+                "group relative flex items-center gap-3 rounded-xl border p-2.5 text-left transition-all",
                 active
-                  ? "border-foreground bg-muted/40 ring-2 ring-foreground/15 shadow-xs"
+                  ? "border-foreground bg-muted/50 ring-2 ring-foreground/15 shadow-xs"
                   : "border-border bg-card hover:bg-muted/25"
               )}
             >
-              {/* Mini Visual Layout Thumbnail */}
               <div className="h-14 w-11 shrink-0 overflow-hidden rounded border border-border bg-white shadow-2xs flex flex-col justify-between">
-                {tpl.id === "executive_sidebar" ? (
-                  <>
-                    <div
-                      className="h-3.5 w-full px-1 flex items-center justify-between"
-                      style={{ backgroundColor: accent }}
-                    >
-                      <span className="h-1.5 w-2.5 rounded-2xs bg-white/90" />
-                      <span className="h-1 w-3 rounded-2xs bg-white/80" />
-                    </div>
-                    <div className="flex-1 flex gap-1 p-1">
-                      <div className="w-3 rounded-2xs bg-slate-100 h-full" />
-                      <div className="flex-1 space-y-1 pt-0.5">
-                        <div className="h-1 w-full bg-slate-200 rounded-2xs" />
-                        <div className="h-1 w-full bg-slate-200 rounded-2xs" />
-                        <div
-                          className="h-1.5 w-4 ml-auto rounded-2xs mt-1"
-                          style={{ backgroundColor: accent }}
-                        />
-                      </div>
-                    </div>
-                    <div
-                      className="h-1 w-full"
-                      style={{ backgroundColor: accent }}
-                    />
-                  </>
-                ) : tpl.id === "classic_banner" ? (
-                  <>
-                    <div
-                      className="h-1.5 w-full"
-                      style={{ backgroundColor: accent }}
-                    />
-                    <div className="flex-1 p-1 space-y-1">
-                      <div className="flex justify-between items-center">
-                        <span className="h-1.5 w-4 bg-slate-800 rounded-2xs" />
-                        <span className="h-2 w-2 rounded-full bg-slate-300" />
-                      </div>
-                      <div className="grid grid-cols-3 gap-0.5">
-                        <span className="h-1.5 bg-slate-100 rounded-2xs" />
-                        <span className="h-1.5 bg-slate-100 rounded-2xs" />
-                        <span className="h-1.5 bg-slate-100 rounded-2xs" />
-                      </div>
-                      <div
-                        className="h-1.5 w-full rounded-2xs"
-                        style={{ backgroundColor: accent }}
-                      />
-                      <div className="h-2.5 w-full bg-slate-100 rounded-2xs" />
-                    </div>
-                    <div
-                      className="h-1.5 w-full"
-                      style={{ backgroundColor: accent }}
-                    />
-                  </>
-                ) : (
-                  <>
-                    <div
-                      className="h-1 w-full"
-                      style={{ backgroundColor: accent }}
-                    />
-                    <div className="h-3.5 w-full bg-slate-100 px-1 flex items-center justify-between">
-                      <span className="h-2 w-2 rounded-full bg-slate-400" />
-                      <span className="h-1 w-3 bg-slate-500 rounded-2xs" />
-                    </div>
-                    <div className="flex-1 p-1 space-y-1">
-                      <div
-                        className="h-1.5 w-full rounded-2xs"
-                        style={{ backgroundColor: accent }}
-                      />
-                      <div className="h-3 w-full border border-slate-200 rounded-2xs" />
-                    </div>
-                    <div
-                      className="h-1 w-full"
-                      style={{ backgroundColor: accent }}
-                    />
-                  </>
-                )}
+                <TemplateMiniPreview id={tpl.id} accent={accent} />
               </div>
 
               <div className="min-w-0 flex-1">

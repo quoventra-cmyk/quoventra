@@ -73,8 +73,19 @@ const quotationPayloadSchema = z.object({
     .regex(/^#[0-9a-fA-F]{6}$/, "Invalid color hex code.")
     .optional(),
   templateStyle: z
-    .enum(["executive_sidebar", "classic_banner", "modern_corporate"])
+    .enum([
+      "executive_sidebar",
+      "classic_banner",
+      "modern_corporate",
+      "minimal_swiss",
+      "bold_split_header",
+      "centered_prestige",
+      "sleek_agency",
+      "compact_contractor",
+      "royal_bordered",
+    ])
     .optional(),
+  logoUrl: z.string().trim().max(500).optional(),
   issueDate: z.string().trim().min(8),
   expiryDate: z.string().trim().optional().nullable(),
   items: z.array(quotationItemSchema).min(1, "Add at least one line item."),
@@ -302,6 +313,9 @@ export async function createManualQuotationAction(
           ...buildBusinessSnapshot(context),
           ...(data.brandColor ? { brand_color: data.brandColor } : {}),
           ...(data.templateStyle ? { template_style: data.templateStyle } : {}),
+          ...(data.logoUrl !== undefined
+            ? { logo_url: data.logoUrl || null }
+            : {}),
         },
       },
     ])
@@ -401,11 +415,17 @@ export async function updateQuotationAction(
         ...existingSnapshot,
         ...(data.brandColor ? { brand_color: data.brandColor } : {}),
         ...(data.templateStyle ? { template_style: data.templateStyle } : {}),
+        ...(data.logoUrl !== undefined
+          ? { logo_url: data.logoUrl || null }
+          : {}),
       }
     : {
         ...buildBusinessSnapshot(context),
         ...(data.brandColor ? { brand_color: data.brandColor } : {}),
         ...(data.templateStyle ? { template_style: data.templateStyle } : {}),
+        ...(data.logoUrl !== undefined
+          ? { logo_url: data.logoUrl || null }
+          : {}),
       };
 
   const { error: updateErr } = await insforge.database

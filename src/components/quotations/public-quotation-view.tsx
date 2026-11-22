@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { CheckCircle2, Loader2, MessageSquareWarning, XCircle } from "lucide-react";
 import { submitPublicQuotationResponseAction } from "@/app/q/[token]/actions";
 import { Badge } from "@/components/ui/badge";
+import type { DocumentTemplateStyle } from "@/components/ui/document-color-picker";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -44,11 +45,7 @@ export interface PublicQuotationPayload {
     country?: string | null;
     logo_url?: string | null;
     brand_color?: string | null;
-    template_style?:
-      | "executive_sidebar"
-      | "classic_banner"
-      | "modern_corporate"
-      | null;
+    template_style?: DocumentTemplateStyle | null;
   };
   items: Array<{
     id: string;
@@ -91,8 +88,13 @@ export function PublicQuotationView({
     /^#[0-9a-fA-F]{6}$/.test(quotation.business.brand_color)
       ? quotation.business.brand_color
       : "#2563eb";
-  const templateStyle =
+  const templateStyle: DocumentTemplateStyle =
     quotation.business?.template_style ?? "executive_sidebar";
+  const logoSrc = quotation.business?.logo_url || "/quoventra-logo.png";
+  const isDarkHeader =
+    templateStyle === "executive_sidebar" ||
+    templateStyle === "bold_split_header" ||
+    templateStyle === "sleek_agency";
 
   async function handleDecision(
     decision: "approved" | "rejected" | "changes_requested"
@@ -130,8 +132,25 @@ export function PublicQuotationView({
   return (
     <main className="min-h-screen bg-muted/20 py-10 px-4 sm:px-6">
       <div className="mx-auto max-w-4xl space-y-6">
-        <Card className="overflow-hidden rounded-2xl shadow-lg border-border/80">
-          {templateStyle !== "executive_sidebar" ? (
+        <Card
+          className={
+            templateStyle === "royal_bordered"
+              ? "overflow-hidden rounded-2xl shadow-lg border-4"
+              : templateStyle === "minimal_swiss"
+                ? "overflow-hidden rounded-2xl shadow-lg border-border/80 border-l-8"
+                : "overflow-hidden rounded-2xl shadow-lg border-border/80"
+          }
+          style={
+            templateStyle === "royal_bordered"
+              ? { borderColor: accent }
+              : templateStyle === "minimal_swiss"
+                ? { borderLeftColor: accent }
+                : undefined
+          }
+        >
+          {!isDarkHeader &&
+          templateStyle !== "royal_bordered" &&
+          templateStyle !== "minimal_swiss" ? (
             <div
               className={
                 templateStyle === "classic_banner"
@@ -143,69 +162,94 @@ export function PublicQuotationView({
           ) : null}
           <CardHeader
             className={
-              templateStyle === "executive_sidebar"
-                ? "p-6 sm:p-8 text-white"
-                : templateStyle === "modern_corporate"
-                  ? "border-b border-border bg-muted/50 p-6 sm:p-8"
-                  : "border-b border-border bg-card p-6 sm:p-8"
+              templateStyle === "sleek_agency"
+                ? "bg-slate-950 p-6 sm:p-8 text-white border-b-4"
+                : isDarkHeader
+                  ? "p-6 sm:p-8 text-white"
+                  : templateStyle === "modern_corporate" ||
+                      templateStyle === "compact_contractor"
+                    ? "border-b border-border bg-muted/50 p-6 sm:p-8"
+                    : "border-b border-border bg-card p-6 sm:p-8"
             }
             style={
-              templateStyle === "executive_sidebar"
-                ? { backgroundColor: accent }
-                : undefined
+              templateStyle === "sleek_agency"
+                ? { borderBottomColor: accent }
+                : isDarkHeader
+                  ? { backgroundColor: accent }
+                  : undefined
             }
           >
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-              <div className="space-y-1.5">
-                <span
-                  className="inline-flex items-center rounded-md px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider"
-                  style={
-                    templateStyle === "executive_sidebar"
-                      ? { backgroundColor: "#ffffff", color: accent }
-                      : { backgroundColor: accent, color: "#ffffff" }
-                  }
-                >
-                  Quotation
-                </span>
-                <p
-                  className={
-                    templateStyle === "executive_sidebar"
-                      ? "text-sm font-semibold text-white/90 pt-1"
-                      : "text-sm font-semibold text-muted-foreground pt-1"
-                  }
-                >
-                  From {quotation.business.name ?? "Business"}
-                </p>
-                <CardTitle
-                  className={
-                    templateStyle === "executive_sidebar"
-                      ? "text-2xl sm:text-3xl font-extrabold tracking-tight text-white"
-                      : "text-2xl sm:text-3xl font-extrabold tracking-tight"
-                  }
-                >
-                  {quotation.title}
-                </CardTitle>
-                <CardDescription
-                  className={
-                    templateStyle === "executive_sidebar"
-                      ? "flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-white/85"
-                      : "flex flex-wrap items-center gap-x-3 gap-y-1 text-xs"
-                  }
-                >
+            <div
+              className={
+                templateStyle === "centered_prestige"
+                  ? "flex flex-col items-center text-center gap-3"
+                  : "flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between"
+              }
+            >
+              <div
+                className={
+                  templateStyle === "centered_prestige"
+                    ? "flex flex-col items-center space-y-2"
+                    : "flex items-start gap-4"
+                }
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={logoSrc}
+                  alt={quotation.business.name ?? "Business logo"}
+                  className="h-14 w-16 shrink-0 rounded-xl border border-border/60 bg-white p-1.5 object-contain shadow-xs"
+                />
+                <div className="space-y-1.5">
                   <span
-                    className={
-                      templateStyle === "executive_sidebar"
-                        ? "font-mono font-bold text-white"
-                        : "font-mono font-bold text-foreground"
+                    className="inline-flex items-center rounded-md px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider"
+                    style={
+                      isDarkHeader
+                        ? { backgroundColor: "#ffffff", color: accent }
+                        : { backgroundColor: accent, color: "#ffffff" }
                     }
                   >
-                    {quotation.quotation_number}
+                    Quotation
                   </span>
-                  <span>• Issue Date: {quotation.issue_date}</span>
-                  {quotation.expiry_date ? (
-                    <span>• Valid Until: {quotation.expiry_date}</span>
-                  ) : null}
-                </CardDescription>
+                  <p
+                    className={
+                      isDarkHeader
+                        ? "text-sm font-semibold text-white/90 pt-1"
+                        : "text-sm font-semibold text-muted-foreground pt-1"
+                    }
+                  >
+                    From {quotation.business.name ?? "Business"}
+                  </p>
+                  <CardTitle
+                    className={
+                      isDarkHeader
+                        ? "text-2xl sm:text-3xl font-extrabold tracking-tight text-white"
+                        : "text-2xl sm:text-3xl font-extrabold tracking-tight"
+                    }
+                  >
+                    {quotation.title}
+                  </CardTitle>
+                  <CardDescription
+                    className={
+                      isDarkHeader
+                        ? "flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-white/85"
+                        : "flex flex-wrap items-center gap-x-3 gap-y-1 text-xs"
+                    }
+                  >
+                    <span
+                      className={
+                        isDarkHeader
+                          ? "font-mono font-bold text-white"
+                          : "font-mono font-bold text-foreground"
+                      }
+                    >
+                      {quotation.quotation_number}
+                    </span>
+                    <span>• Issue Date: {quotation.issue_date}</span>
+                    {quotation.expiry_date ? (
+                      <span>• Valid Until: {quotation.expiry_date}</span>
+                    ) : null}
+                  </CardDescription>
+                </div>
               </div>
               <Badge
                 variant={

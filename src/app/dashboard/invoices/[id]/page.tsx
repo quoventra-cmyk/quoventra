@@ -138,12 +138,14 @@ export default async function InvoiceDetailPage({
           templateStyle:
             (
               invoice.business_snapshot as {
-                template_style?:
-                  | "executive_sidebar"
-                  | "classic_banner"
-                  | "modern_corporate";
+                template_style?: import("@/components/ui/document-color-picker").DocumentTemplateStyle;
               } | null
             )?.template_style ?? "executive_sidebar",
+          logoUrl:
+            (invoice.business_snapshot as { logo_url?: string } | null)
+              ?.logo_url ??
+            context.business.logo_url ??
+            "/quoventra-logo.png",
           issueDate: invoice.issue_date,
           dueDate: invoice.due_date ?? "",
           items:

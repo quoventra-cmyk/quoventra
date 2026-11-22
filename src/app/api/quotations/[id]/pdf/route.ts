@@ -1,3 +1,4 @@
+import path from "node:path";
 import React from "react";
 import { NextResponse, type NextRequest } from "next/server";
 import { renderToBuffer } from "@react-pdf/renderer";
@@ -46,8 +47,22 @@ export async function GET(
   }
 
   const snapshot = (quotation.business_snapshot ?? {}) as PdfBusinessInfo;
+  const defaultLogoPath = path.join(
+    process.cwd(),
+    "public",
+    "quoventra-logo.png"
+  );
+  const rawLogo =
+    snapshot.logo_url ?? businessContext.business.logo_url ?? null;
+  const resolvedLogo =
+    !rawLogo || rawLogo === "/quoventra-logo.png"
+      ? defaultLogoPath
+      : rawLogo.startsWith("/")
+        ? path.join(process.cwd(), "public", rawLogo.replace(/^\//, ""))
+        : rawLogo;
+
   const businessInfo: PdfBusinessInfo = snapshot.name
-    ? snapshot
+    ? { ...snapshot, logo_url: resolvedLogo }
     : {
         name: businessContext.business.name,
         email: businessContext.business.email,
@@ -58,7 +73,7 @@ export async function GET(
         region: businessContext.business.region,
         country: businessContext.business.country,
         postal_code: businessContext.business.postal_code,
-        logo_url: businessContext.business.logo_url,
+        logo_url: resolvedLogo,
         tax_registration_number:
           businessContext.business.tax_registration_number,
         brand_color: businessContext.settings?.brand_color ?? "#2563eb",

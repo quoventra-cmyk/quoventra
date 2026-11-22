@@ -135,12 +135,14 @@ export default async function QuotationDetailPage({
           templateStyle:
             (
               quotation.business_snapshot as {
-                template_style?:
-                  | "executive_sidebar"
-                  | "classic_banner"
-                  | "modern_corporate";
+                template_style?: import("@/components/ui/document-color-picker").DocumentTemplateStyle;
               } | null
             )?.template_style ?? "executive_sidebar",
+          logoUrl:
+            (quotation.business_snapshot as { logo_url?: string } | null)
+              ?.logo_url ??
+            context.business.logo_url ??
+            "/quoventra-logo.png",
           issueDate: quotation.issue_date,
           expiryDate: quotation.expiry_date ?? "",
           items:

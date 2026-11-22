@@ -88,6 +88,7 @@ interface InvoiceEditorProps {
     terms: string;
     brandColor?: string;
     templateStyle?: DocumentTemplateStyle;
+    logoUrl?: string;
     issueDate: string;
     dueDate: string;
     items: EditableInvoiceItem[];
@@ -136,6 +137,9 @@ export function InvoiceEditor({
   );
   const [templateStyle, setTemplateStyle] = useState<DocumentTemplateStyle>(
     initialValues.templateStyle ?? "executive_sidebar"
+  );
+  const [logoUrl, setLogoUrl] = useState(
+    initialValues.logoUrl ?? "/quoventra-logo.png"
   );
   const [issueDate, setIssueDate] = useState(initialValues.issueDate);
   const [dueDate, setDueDate] = useState(initialValues.dueDate);
@@ -235,6 +239,7 @@ export function InvoiceEditor({
         terms: terms || undefined,
         brandColor,
         templateStyle,
+        logoUrl: logoUrl.trim() || "/quoventra-logo.png",
         issueDate,
         dueDate: dueDate || null,
         items: items.map((i) => ({
@@ -307,36 +312,58 @@ export function InvoiceEditor({
       <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-xs">
         <div className="h-2 w-full" style={{ backgroundColor: brandColor }} />
         <div className="p-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2.5">
-              <span
-                className="rounded-md px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider text-white"
-                style={{ backgroundColor: brandColor }}
-              >
-                Invoice
-              </span>
-              {invoiceNumber ? (
-                <span className="font-mono text-sm font-bold text-foreground">
-                  {invoiceNumber}
+          <div className="flex items-start gap-3.5">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={logoUrl.trim() || "/quoventra-logo.png"}
+              alt="Invoice logo"
+              className="h-12 w-14 shrink-0 rounded-xl border border-border bg-white p-1.5 object-contain shadow-xs"
+            />
+            <div className="space-y-1">
+              <div className="flex items-center gap-2.5">
+                <span
+                  className="rounded-md px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider text-white"
+                  style={{ backgroundColor: brandColor }}
+                >
+                  Invoice
                 </span>
-              ) : null}
+                {invoiceNumber ? (
+                  <span className="font-mono text-sm font-bold text-foreground">
+                    {invoiceNumber}
+                  </span>
+                ) : null}
+              </div>
+              <p className="text-base font-bold text-foreground">
+                {title || "Untitled Invoice"}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Total:{" "}
+                <span className="font-bold" style={{ color: brandColor }}>
+                  {formatCurrency(summary.total, currency)}
+                </span>{" "}
+                • Logo, layout &amp; color apply to your exported PDF invoice
+              </p>
             </div>
-            <p className="text-base font-bold text-foreground">
-              {title || "Untitled Invoice"}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              Total:{" "}
-              <span className="font-bold" style={{ color: brandColor }}>
-                {formatCurrency(summary.total, currency)}
-              </span>{" "}
-              • Applies to your exported PDF invoice
-            </p>
           </div>
-          <DocumentColorPicker
-            value={brandColor}
-            onChange={setBrandColor}
-            label="Invoice Color Theme"
-          />
+          <div className="space-y-3">
+            <DocumentColorPicker
+              value={brandColor}
+              onChange={setBrandColor}
+              label="Invoice Color Theme"
+            />
+            <div className="flex items-center gap-2">
+              <Label htmlFor="invoice-logo-url" className="text-xs shrink-0">
+                Logo URL:
+              </Label>
+              <Input
+                id="invoice-logo-url"
+                value={logoUrl}
+                onChange={(e) => setLogoUrl(e.target.value)}
+                placeholder="/quoventra-logo.png or https://..."
+                className="h-8 text-xs"
+              />
+            </div>
+          </div>
         </div>
         <div className="border-t border-border/70 bg-muted/20 px-5 py-4">
           <DocumentTemplatePicker

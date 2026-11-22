@@ -7,6 +7,7 @@ import {
   Text,
   View,
 } from "@react-pdf/renderer";
+import type { DocumentTemplateStyle } from "@/components/ui/document-color-picker";
 import { formatCurrency } from "@/lib/pricing/engine";
 
 export interface PdfBusinessInfo {
@@ -22,11 +23,7 @@ export interface PdfBusinessInfo {
   logo_url?: string | null;
   tax_registration_number?: string | null;
   brand_color?: string | null;
-  template_style?:
-    | "executive_sidebar"
-    | "classic_banner"
-    | "modern_corporate"
-    | null;
+  template_style?: DocumentTemplateStyle | null;
 }
 
 export interface PdfLineItem {
@@ -82,7 +79,12 @@ export function EstimatePdfDocument(props: EstimatePdfProps) {
     props.business.country,
   ].filter(Boolean);
 
-  if (templateStyle === "executive_sidebar") {
+  if (
+    templateStyle === "executive_sidebar" ||
+    templateStyle === "bold_split_header" ||
+    templateStyle === "sleek_agency"
+  ) {
+    const headerBg = templateStyle === "sleek_agency" ? "#0f172a" : accent;
     const s = StyleSheet.create({
       page: {
         paddingTop: 0,
@@ -94,13 +96,15 @@ export function EstimatePdfDocument(props: EstimatePdfProps) {
         backgroundColor: "#ffffff",
       },
       headerBand: {
-        backgroundColor: accent,
+        backgroundColor: headerBg,
         color: "#ffffff",
         paddingHorizontal: 36,
         paddingVertical: 26,
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
+        borderBottomWidth: templateStyle === "sleek_agency" ? 4 : 0,
+        borderBottomColor: accent,
       },
       brandBox: {
         maxWidth: "58%",
@@ -428,7 +432,11 @@ export function EstimatePdfDocument(props: EstimatePdfProps) {
     );
   }
 
-  if (templateStyle === "classic_banner") {
+  if (
+    templateStyle === "classic_banner" ||
+    templateStyle === "centered_prestige" ||
+    templateStyle === "minimal_swiss"
+  ) {
     const s = StyleSheet.create({
       page: {
         paddingTop: 0,
@@ -460,7 +468,8 @@ export function EstimatePdfDocument(props: EstimatePdfProps) {
         paddingTop: 26,
       },
       topHeader: {
-        flexDirection: "row",
+        flexDirection:
+          templateStyle === "centered_prestige" ? "column" : "row",
         justifyContent: "space-between",
         alignItems: "center",
         marginBottom: 24,
@@ -717,7 +726,8 @@ export function EstimatePdfDocument(props: EstimatePdfProps) {
     );
   }
 
-  // Default / "modern_corporate" (Image 3: Top/Bottom bar + Shaded header band + Bordered grid)
+  // Default / "modern_corporate" | "compact_contractor" | "royal_bordered"
+  const isRoyal = templateStyle === "royal_bordered";
   const styles = StyleSheet.create({
     page: {
       paddingTop: 0,
@@ -727,6 +737,8 @@ export function EstimatePdfDocument(props: EstimatePdfProps) {
       fontFamily: "Helvetica",
       color: "#0f172a",
       backgroundColor: "#ffffff",
+      borderWidth: isRoyal ? 6 : 0,
+      borderColor: isRoyal ? accent : "#ffffff",
     },
     topBanner: {
       height: 10,
