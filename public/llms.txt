@@ -1,0 +1,42 @@
+# Quoventra
+
+> Estimate smarter. Grow faster. AI-powered estimates, quotations and invoicing for modern businesses.
+
+Website: https://www.quoventraa.com
+Sitemap: https://www.quoventraa.com/sitemap.xml
+
+## Product Overview
+Quoventra is a B2B SaaS platform that helps service businesses, contractors, agencies, and freelancers convert plain-language job notes into accurate, itemized cost estimates using their own saved pricing rules—and then convert those estimates into client-approved online quotations and branded PDF invoices.
+
+## Core Capabilities
+- **AI Estimate Generator**: Turns plain-language job descriptions into structured labour, material, and service line items using the business's saved catalog and pricing rules (never fabricates unapproved pricing).
+- **Multi-Industry Pricing Engine**: Supports fixed, hourly, per-square-foot, distance-based, material-plus-markup, and custom pricing with decimal-safe calculations.
+- **Online Quotations & Client Approval Links (`/q/[token]`)**: Shareable public quotation links where clients can review itemized quotes, approve, decline, or request changes online.
+- **Branded Invoices & 9 Customizable PDF Templates**: 9 selectable executive template designs with custom brand color themes and direct PNG/JPG company logo uploads.
+- **Customer CRM & Business Analytics**: Centralizes customer contact records, document histories, estimated vs. collected revenue charts, and quotation approval rates.
+
+## Industries Served
+- Construction & Renovation
+- Cleaning & Janitorial Services
+- Landscaping & Lawn Care
+- Plumbing, Electrical & HVAC
+- IT Services, Web Agencies & Consulting
+- Freelancers & General Service Businesses
+
+## Subscription Plans (USD / Monthly)
+- **Free ($0/mo)**: 10 estimates/mo, 10 AI generations/mo, 25 customers, 1 team member.
+- **Starter ($19/mo)**: 100 estimates/mo, 50 AI generations/mo, 250 customers, 2 team members, ad-free.
+- **Professional ($49/mo)**: 500 estimates/mo, 250 AI generations/mo, 2,000 customers, 5 team members, custom logo & color branding.
+- **Business ($99/mo)**: 5,000 estimates/mo, 1,000 AI generations/mo, 20,000 customers, 25 team members, custom branding + automated reminders.
+
+## Key Public Pages
+- Homepage: https://www.quoventraa.com/
+- Features: https://www.quoventraa.com/features
+- Industries: https://www.quoventraa.com/industries
+- Pricing: https://www.quoventraa.com/pricing
+- How It Works: https://www.quoventraa.com/how-it-works
+- Interactive Document Preview: https://www.quoventraa.com/preview
+- Resources & Guides: https://www.quoventraa.com/resources
+- About: https://www.quoventraa.com/about
+- Contact: https://www.quoventraa.com/contact
+

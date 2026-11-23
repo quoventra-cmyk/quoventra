@@ -74,8 +74,49 @@ const highlights = [
 ];
 
 export default function HomePage() {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: siteConfig.name,
+    url: siteConfig.url,
+    slogan: siteConfig.tagline,
+    description: siteConfig.description,
+    applicationCategory: "BusinessApplication",
+    operatingSystem: "Web",
+    offers: [
+      {
+        "@type": "Offer",
+        name: "Free",
+        price: "0",
+        priceCurrency: "USD",
+      },
+      {
+        "@type": "Offer",
+        name: "Starter",
+        price: "19",
+        priceCurrency: "USD",
+      },
+      {
+        "@type": "Offer",
+        name: "Professional",
+        price: "49",
+        priceCurrency: "USD",
+      },
+      {
+        "@type": "Offer",
+        name: "Business",
+        price: "99",
+        priceCurrency: "USD",
+      },
+    ],
+  };
+
   return (
     <main className="flex-1">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* Hero */}
       <section className="relative overflow-hidden border-b border-border bg-gradient-to-b from-indigo-50/70 via-background to-background dark:from-indigo-950/30">
         <div
