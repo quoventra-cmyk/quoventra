@@ -17,7 +17,11 @@ let browserClient: BrowserClientAdapter | null = null;
  */
 export function getSupabaseBrowserClient(): BrowserClientAdapter {
   if (!browserClient) {
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() ?? "";
+    const url =
+      process.env.NEXT_PUBLIC_SUPABASE_URL
+        ?.trim()
+        .replace(/\/rest\/v1\/?$/i, "")
+        .replace(/\/+$/, "") ?? "";
     const anonKey =
       (
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??

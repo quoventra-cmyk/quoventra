@@ -30,13 +30,24 @@ const serverEnvSchema = publicEnvSchema.extend({
 });
 
 /**
+ * Normalizes a Supabase URL so accidental trailing `/rest/v1` or `/` never breaks Auth/REST paths.
+ */
+export function normalizeSupabaseUrl(raw?: string): string | undefined {
+  const trimmed = raw?.trim();
+  if (!trimmed) return undefined;
+  return trimmed.replace(/\/rest\/v1\/?$/i, "").replace(/\/+$/, "");
+}
+
+/**
  * Public environment variables safe for client and server use.
  */
 export function getPublicEnv() {
   return publicEnvSchema.parse({
     NEXT_PUBLIC_APP_NAME: process.env.NEXT_PUBLIC_APP_NAME,
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
-    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
+    NEXT_PUBLIC_SUPABASE_URL: normalizeSupabaseUrl(
+      process.env.NEXT_PUBLIC_SUPABASE_URL
+    ),
     NEXT_PUBLIC_SUPABASE_ANON_KEY:
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??
       process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY,
