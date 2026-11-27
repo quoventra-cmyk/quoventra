@@ -1,10 +1,9 @@
 "use server";
 
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { createAuthActions } from "@insforge/sdk/ssr";
 import { z } from "zod";
-import { createInsForgeServerClient } from "@/lib/database/server";
+import { getPublicEnv } from "@/config/env";
+import { createSupabaseServerClient } from "@/lib/database/server";
 
 const signInSchema = z.object({
   email: z.string().trim().email("Enter a valid email address."),
@@ -52,14 +51,17 @@ export async function signInAction(input: {
     };
   }
 
-  const auth = createAuthActions({ cookies: await cookies() });
-  const { data, error } = await auth.signInWithPassword({
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase.auth.signInWithPassword({
     email: parsed.data.email,
     password: parsed.data.password,
   });
 
   if (error || !data?.user) {
-    const emailNotVerified = error?.statusCode === 403;
+    const msg = error?.message ?? "";
+    const emailNotVerified =
+      msg.toLowerCase().includes("email not confirmed") ||
+      error?.status === 403;
     return {
       ok: false,
       emailNotVerified,
@@ -87,11 +89,18 @@ export async function signUpAction(input: {
     };
   }
 
-  const auth = createAuthActions({ cookies: await cookies() });
-  const { data, error } = await auth.signUp({
+  const env = getPublicEnv();
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase.auth.signUp({
     email: parsed.data.email,
     password: parsed.data.password,
-    name: parsed.data.fullName,
+    options: {
+      data: {
+        full_name: parsed.data.fullName,
+        name: parsed.data.fullName,
+      },
+      emailRedirectTo: `${env.NEXT_PUBLIC_APP_URL}/auth/callback?next=/dashboard/onboarding`,
+    },
   });
 
   if (error) {
@@ -101,11 +110,12 @@ export async function signUpAction(input: {
     };
   }
 
-  if (data?.requireEmailVerification) {
+  if (data?.user && !data?.session) {
     return {
       ok: true,
       requiresVerification: true,
-      message: "Check your email for a 6-digit verification code.",
+      message:
+        "Check your email to confirm your account (enter the 6-digit code or click the confirmation link).",
     };
   }
 
@@ -124,10 +134,11 @@ export async function verifyEmailAction(input: {
     };
   }
 
-  const auth = createAuthActions({ cookies: await cookies() });
-  const { data, error } = await auth.verifyEmail({
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase.auth.verifyOtp({
     email: parsed.data.email,
-    otp: parsed.data.otp,
+    token: parsed.data.otp,
+    type: "signup",
   });
 
   if (error || !data?.user) {
@@ -151,8 +162,9 @@ export async function resendVerificationAction(input: {
     };
   }
 
-  const insforge = await createInsForgeServerClient();
-  const { error } = await insforge.auth.resendVerificationEmail({
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.auth.resend({
+    type: "signup",
     email: parsed.data.email,
   });
 
@@ -165,7 +177,7 @@ export async function resendVerificationAction(input: {
 
   return {
     ok: true,
-    message: "A fresh verification code has been sent to your email.",
+    message: "A fresh verification email has been sent.",
   };
 }
 
@@ -180,10 +192,14 @@ export async function sendResetPasswordAction(input: {
     };
   }
 
-  const insforge = await createInsForgeServerClient();
-  const { error } = await insforge.auth.sendResetPasswordEmail({
-    email: parsed.data.email,
-  });
+  const env = getPublicEnv();
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.auth.resetPasswordForEmail(
+    parsed.data.email,
+    {
+      redirectTo: `${env.NEXT_PUBLIC_APP_URL}/auth/callback?next=/dashboard/settings`,
+    }
+  );
 
   if (error) {
     return {
@@ -194,7 +210,8 @@ export async function sendResetPasswordAction(input: {
 
   return {
     ok: true,
-    message: "If an account exists for that email, a 6-digit reset code has been sent.",
+    message:
+      "If an account exists for that email, a password reset code has been sent.",
   };
 }
 
@@ -211,23 +228,22 @@ export async function resetPasswordWithCodeAction(input: {
     };
   }
 
-  const insforge = await createInsForgeServerClient();
-  const { data: tokenData, error: exchangeError } =
-    await insforge.auth.exchangeResetPasswordToken({
-      email: parsed.data.email,
-      code: parsed.data.code,
-    });
+  const supabase = await createSupabaseServerClient();
+  const { data: verifyData, error: verifyError } = await supabase.auth.verifyOtp({
+    email: parsed.data.email,
+    token: parsed.data.code,
+    type: "recovery",
+  });
 
-  if (exchangeError || !tokenData?.token) {
+  if (verifyError || !verifyData?.user) {
     return {
       ok: false,
-      error: exchangeError?.message ?? "Invalid or expired reset code.",
+      error: verifyError?.message ?? "Invalid or expired reset code.",
     };
   }
 
-  const { error: resetError } = await insforge.auth.resetPassword({
-    newPassword: parsed.data.newPassword,
-    otp: tokenData.token,
+  const { error: resetError } = await supabase.auth.updateUser({
+    password: parsed.data.newPassword,
   });
 
   if (resetError) {
@@ -244,7 +260,7 @@ export async function resetPasswordWithCodeAction(input: {
 }
 
 export async function signOutAction() {
-  const auth = createAuthActions({ cookies: await cookies() });
-  await auth.signOut();
+  const supabase = await createSupabaseServerClient();
+  await supabase.auth.signOut();
   redirect("/login");
 }

@@ -3,6 +3,9 @@ import { z } from "zod";
 const publicEnvSchema = z.object({
   NEXT_PUBLIC_APP_NAME: z.string().default("Quoventra"),
   NEXT_PUBLIC_APP_URL: z.string().url().default("http://localhost:3000"),
+  NEXT_PUBLIC_SUPABASE_URL: z.string().optional(),
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().optional(),
+  // Legacy fallback fields (kept optional for backward compatibility)
   NEXT_PUBLIC_INSFORGE_URL: z.string().optional(),
   NEXT_PUBLIC_INSFORGE_ANON_KEY: z.string().optional(),
   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string().optional(),
@@ -11,6 +14,7 @@ const publicEnvSchema = z.object({
 });
 
 const serverEnvSchema = publicEnvSchema.extend({
+  SUPABASE_SERVICE_ROLE_KEY: z.string().optional(),
   INSFORGE_SERVICE_ROLE_KEY: z.string().optional(),
   AI_PROVIDER: z.enum(["openrouter", "openai", "anthropic"]).default("openrouter"),
   OPENROUTER_API_KEY: z.string().optional(),
@@ -32,6 +36,10 @@ export function getPublicEnv() {
   return publicEnvSchema.parse({
     NEXT_PUBLIC_APP_NAME: process.env.NEXT_PUBLIC_APP_NAME,
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
+    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
+    NEXT_PUBLIC_SUPABASE_ANON_KEY:
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??
+      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY,
     NEXT_PUBLIC_INSFORGE_URL:
       process.env.NEXT_PUBLIC_INSFORGE_URL ??
       process.env.NEXT_PUBLIC_INSFORGE_BASE_URL,
@@ -55,14 +63,20 @@ export function getServerEnv() {
 }
 
 /**
- * Reports whether required InsForge connection credentials are configured.
+ * Reports whether required Supabase connection credentials are configured.
  */
-export function isInsForgeConfigured(): boolean {
-  const baseUrl = (
-    process.env.NEXT_PUBLIC_INSFORGE_URL ??
-    process.env.NEXT_PUBLIC_INSFORGE_BASE_URL
+export function isSupabaseConfigured(): boolean {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
+  const anonKey = (
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY
   )?.trim();
-  const anonKey = process.env.NEXT_PUBLIC_INSFORGE_ANON_KEY?.trim();
-  return Boolean(baseUrl && anonKey);
+  return Boolean(url && anonKey);
 }
 
+/**
+ * Backward-compatible alias for backend configuration checks.
+ */
+export function isInsForgeConfigured(): boolean {
+  return isSupabaseConfigured();
+}

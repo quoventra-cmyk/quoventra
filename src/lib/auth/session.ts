@@ -49,27 +49,30 @@ export interface ActiveBusinessContext {
 }
 
 /**
- * Returns the currently signed-in user from InsForge cookies, or null.
+ * Returns the currently signed-in user from Supabase cookies, or null.
  */
 export async function getCurrentAuthUser(): Promise<AuthenticatedUser | null> {
   const insforge = await createInsForgeServerClient();
-  const { data, error } = await insforge.auth.getCurrentUser();
+  const { data, error } = await insforge.auth.getUser();
   if (error || !data?.user) {
     return null;
   }
 
-  const profileObj = (data.user.profile ?? {}) as Record<string, unknown>;
-  const name =
-    typeof profileObj.name === "string" && profileObj.name.trim().length > 0
-      ? profileObj.name
-      : data.user.email.split("@")[0] ?? "User";
+  const email = data.user.email ?? "";
+  const metadata = (data.user.user_metadata ?? {}) as Record<string, unknown>;
+  const rawName =
+    typeof metadata.full_name === "string" && metadata.full_name.trim().length > 0
+      ? metadata.full_name.trim()
+      : typeof metadata.name === "string" && metadata.name.trim().length > 0
+        ? metadata.name.trim()
+        : email.split("@")[0] ?? "User";
   const avatarUrl =
-    typeof profileObj.avatar_url === "string" ? profileObj.avatar_url : null;
+    typeof metadata.avatar_url === "string" ? metadata.avatar_url : null;
 
   return {
     id: data.user.id,
-    email: data.user.email,
-    name,
+    email,
+    name: rawName,
     avatarUrl,
   };
 }

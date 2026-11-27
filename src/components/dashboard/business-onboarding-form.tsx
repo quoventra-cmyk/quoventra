@@ -14,7 +14,6 @@ import {
   createBusinessAction,
   updateBusinessProfileAction,
 } from "@/lib/business/actions";
-import { getInsForgeBrowserClient } from "@/lib/database/browser";
 
 const CURRENCIES = ["USD", "CAD", "EUR", "GBP", "AUD", "NZD"] as const;
 const COUNTRIES = [
@@ -111,18 +110,37 @@ export function BusinessForm({
     setError(null);
     setUploadingLogo(true);
     try {
-      const insforge = getInsForgeBrowserClient();
-      const { data, error: uploadError } = await insforge.storage
-        .from("business-assets")
-        .uploadAuto(file);
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onerror = () => reject(new Error("Could not read image file."));
+        reader.onload = () => {
+          const img = new Image();
+          img.onerror = () => reject(new Error("Invalid image file."));
+          img.onload = () => {
+            const maxDim = 400;
+            const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+            const width = Math.max(1, Math.round(img.width * scale));
+            const height = Math.max(1, Math.round(img.height * scale));
+            const canvas = document.createElement("canvas");
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext("2d");
+            if (!ctx) {
+              reject(new Error("Canvas not available."));
+              return;
+            }
+            ctx.drawImage(img, 0, 0, width, height);
+            resolve(canvas.toDataURL("image/png"));
+          };
+          img.src = String(reader.result);
+        };
+        reader.readAsDataURL(file);
+      });
 
-      if (uploadError || !data) {
-        setError(uploadError?.message ?? "Logo upload failed.");
-        return;
-      }
-
-      setLogoUrl(data.url);
-      setLogoKey(data.key);
+      setLogoUrl(dataUrl);
+      setLogoKey(`inline-logo-${Date.now()}`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Logo upload failed.");
     } finally {
       setUploadingLogo(false);
     }

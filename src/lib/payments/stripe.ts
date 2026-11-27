@@ -1,4 +1,4 @@
-import { createAdminClient } from "@insforge/sdk";
+import { createClient } from "@supabase/supabase-js";
 import Stripe from "stripe";
 import { getPublicEnv, getServerEnv } from "@/config/env";
 
@@ -20,16 +20,33 @@ export function getStripeClient(): Stripe | null {
   return stripeInstance;
 }
 
-export function getInsForgeAdminClient() {
+/**
+ * Returns a privileged Supabase service-role client for server-side webhooks
+ * and admin workflows that bypass RLS.
+ */
+export function getSupabaseAdminClient() {
   const pub = getPublicEnv();
   const srv = getServerEnv();
-  const apiKey = srv.INSFORGE_SERVICE_ROLE_KEY?.trim();
-  const baseUrl = pub.NEXT_PUBLIC_INSFORGE_URL?.trim();
+  const serviceKey = srv.SUPABASE_SERVICE_ROLE_KEY?.trim();
+  const baseUrl = pub.NEXT_PUBLIC_SUPABASE_URL?.trim();
 
-  if (!baseUrl || !apiKey) {
+  if (!baseUrl || !serviceKey) {
     return null;
   }
 
-  return createAdminClient({ baseUrl, apiKey });
+  const client = createClient(baseUrl, serviceKey, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+    },
+  });
+
+  return {
+    database: client,
+    auth: client.auth,
+    storage: client.storage,
+    raw: client,
+  };
 }
 
+export const getInsForgeAdminClient = getSupabaseAdminClient;

@@ -1,4 +1,15 @@
-import { createRefreshAuthRouter } from "@insforge/sdk/ssr";
+import { NextResponse } from "next/server";
+import { createSupabaseServerClient } from "@/lib/database/server";
 
-export const { POST } = createRefreshAuthRouter();
-
+export async function POST() {
+  try {
+    const supabase = await createSupabaseServerClient();
+    const { data, error } = await supabase.auth.getUser();
+    if (error || !data?.user) {
+      return NextResponse.json({ ok: false }, { status: 401 });
+    }
+    return NextResponse.json({ ok: true });
+  } catch {
+    return NextResponse.json({ ok: false }, { status: 500 });
+  }
+}

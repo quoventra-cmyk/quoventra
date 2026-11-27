@@ -1,41 +1,55 @@
-import { createClient } from "@insforge/sdk";
-import { getPublicEnv, isInsForgeConfigured } from "@/config/env";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { getPublicEnv, isSupabaseConfigured } from "@/config/env";
 
-export type InsForgeClient = ReturnType<typeof createClient>;
+export interface DatabaseClientAdapter {
+  database: SupabaseClient;
+  auth: SupabaseClient["auth"];
+  storage: SupabaseClient["storage"];
+  raw: SupabaseClient;
+}
 
-let cachedClient: InsForgeClient | null = null;
+export type InsForgeClient = DatabaseClientAdapter;
+
+let cachedClient: DatabaseClientAdapter | null = null;
 
 /**
- * Returns a configured InsForge client instance when credentials are present,
- * or null if InsForge environment variables have not been configured yet.
+ * Returns a configured stateless Supabase client when credentials are present,
+ * or null if Supabase environment variables have not been configured yet.
  */
-export function getInsForgeClient(): InsForgeClient | null {
-  if (!isInsForgeConfigured()) {
+export function getSupabaseClient(): DatabaseClientAdapter | null {
+  if (!isSupabaseConfigured()) {
     return null;
   }
 
   if (!cachedClient) {
     const env = getPublicEnv();
-    cachedClient = createClient({
-      baseUrl: env.NEXT_PUBLIC_INSFORGE_URL!,
-      anonKey: env.NEXT_PUBLIC_INSFORGE_ANON_KEY!,
-    });
+    const client = createClient(
+      env.NEXT_PUBLIC_SUPABASE_URL!.trim(),
+      env.NEXT_PUBLIC_SUPABASE_ANON_KEY!.trim()
+    );
+    cachedClient = {
+      database: client,
+      auth: client.auth,
+      storage: client.storage,
+      raw: client,
+    };
   }
 
   return cachedClient;
 }
 
 /**
- * Returns a configured InsForge client or throws a clear configuration error.
- * Use in server routes and services that require an active backend connection.
+ * Returns a configured Supabase client or throws a clear configuration error.
  */
-export function requireInsForgeClient(): InsForgeClient {
-  const client = getInsForgeClient();
+export function requireSupabaseClient(): DatabaseClientAdapter {
+  const client = getSupabaseClient();
   if (!client) {
     throw new Error(
-      "InsForge is not configured. Set NEXT_PUBLIC_INSFORGE_URL and NEXT_PUBLIC_INSFORGE_ANON_KEY in .env.local."
+      "Supabase is not configured. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in .env.local."
     );
   }
   return client;
 }
 
+export const getInsForgeClient = getSupabaseClient;
+export const requireInsForgeClient = requireSupabaseClient;
